@@ -1,0 +1,5 @@
+﻿<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Solo debug permite HTTP local (10.0.2.2/LAN). Release conserva HTTPS obligatorio. -->
+    <application android:usesCleartextTraffic="true" />
+</manifest>

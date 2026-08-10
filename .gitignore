@@ -1,0 +1,57 @@
+# ==============================================================================
+# GitIgnore para Proyecto Móvil (Flutter) - Proyecto Taji
+# ==============================================================================
+
+# Artefactos y archivos generados por Flutter / Dart / Pub
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# Archivos de depuración y símbolos
+app.*.symbols
+app.*.map.json
+
+# Artefactos de Android Studio / Gradle
+/android/app/debug
+/android/app/profile
+/android/app/release
+/android/.gradle
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+/android/local.properties
+
+# Archivos de configuración e IDEs
+*.iml
+*.ipr
+*.iws
+.idea/
+.metadata
+migrate_working_dir/
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+
+# Archivos temporales y de sistema operativo
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+Thumbs.db
