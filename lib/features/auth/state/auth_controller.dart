@@ -15,10 +15,16 @@ class AuthController extends ChangeNotifier {
   String? error;
 
   Future<void> initialize() async {
-    user = await _repository.restoreSession();
-    status = user == null
-        ? AuthStatus.unauthenticated
-        : AuthStatus.authenticated;
+    try {
+      user = await _repository.restoreSession();
+      status = user == null
+          ? AuthStatus.unauthenticated
+          : AuthStatus.authenticated;
+    } on Object {
+      user = null;
+      status = AuthStatus.unauthenticated;
+      error = 'No pudimos restaurar tu sesión. Intenta iniciar nuevamente.';
+    }
     notifyListeners();
   }
 
@@ -31,6 +37,9 @@ class AuthController extends ChangeNotifier {
     } on AuthException catch (exception) {
       error = exception.message;
       return false;
+    } on Object {
+      error = 'No pudimos iniciar sesión. Intenta nuevamente.';
+      return false;
     } finally {
       _end();
     }
@@ -40,6 +49,8 @@ class AuthController extends ChangeNotifier {
     _begin();
     try {
       await _repository.logout();
+    } on Object {
+      // El repositorio siempre elimina la sesión local aunque la API no responda.
     } finally {
       user = null;
       status = AuthStatus.unauthenticated;

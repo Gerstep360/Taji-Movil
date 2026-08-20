@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../state/auth_controller.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/auth_scaffold.dart';
 import '../../../shared/widgets/status_banner.dart';
 import '../../../shared/widgets/taji_button.dart';
 import '../../../shared/widgets/taji_text_field.dart';
-import 'forgot_password_screen.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({this.registered = false, super.key});
+
+  final bool registered;
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -45,6 +47,12 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (widget.registered)
+                const StatusBanner(
+                  message: 'Tu cuenta fue creada. Ya puedes iniciar sesión.',
+                  success: true,
+                ),
+              if (widget.registered) const SizedBox(height: 15),
               StatusBanner(message: auth.error ?? ''),
               if (auth.error != null) const SizedBox(height: 15),
               TajiTextField(
@@ -82,11 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const ForgotPasswordScreen(),
-                    ),
-                  ),
+                  onPressed: () =>
+                      context.pushNamed(AppRoute.forgotPassword.name),
                   child: const Text('¿Olvidaste tu contraseña?'),
                 ),
               ),
@@ -105,9 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 13),
                   ),
                   TextButton(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                    ),
+                    onPressed: () => context.pushNamed(AppRoute.register.name),
                     child: const Text('Crear cuenta'),
                   ),
                 ],
