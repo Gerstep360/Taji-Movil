@@ -1,5 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../storage/secure_storage.dart';
+
 class TokenPair {
   const TokenPair({required this.access, required this.refresh});
   final String access;
@@ -7,14 +9,13 @@ class TokenPair {
 }
 
 class TokenStore {
+  TokenStore({FlutterSecureStorage? storage})
+    : _storage = storage ?? tajiSecureStorage;
+
   static const _accessKey = 'taji_access_token';
   static const _refreshKey = 'taji_refresh_token';
 
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(
-    iOptions: IOSOptions(
-      accessibility: KeychainAccessibility.first_unlock_this_device,
-    ),
-  );
+  final FlutterSecureStorage _storage;
 
   String? _access;
   String? _refresh;

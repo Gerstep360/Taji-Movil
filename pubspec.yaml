@@ -1,5 +1,5 @@
 name: taji
-description: "A new Flutter project."
+description: "Taji: gestión segura y ligera para comunidades residenciales."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -37,6 +37,7 @@ dependencies:
   dio: ^5.11.0
   flutter_secure_storage: ^10.3.1
   provider: ^6.1.5+1
+  go_router: ^17.0.0
 
 dev_dependencies:
   flutter_test:

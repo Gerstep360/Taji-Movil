@@ -17,6 +17,13 @@ class TajiRole {
     description: json['description'] as String? ?? '',
     permissions: List<String>.from(json['permissions'] as List? ?? const []),
   );
+
+  Map<String, dynamic> toJson() => {
+    'slug': slug,
+    'name': name,
+    'description': description,
+    'permissions': permissions,
+  };
 }
 
 class TajiUser {
@@ -55,4 +62,14 @@ class TajiUser {
         ? TajiRole.fromJson(json['role'] as Map<String, dynamic>)
         : null,
   );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'email': email,
+    'first_name': firstName,
+    'last_name': lastName,
+    'full_name': fullName,
+    'phone': phone,
+    'role': role?.toJson(),
+  };
 }

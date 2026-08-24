@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../data/auth_repository.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/auth_scaffold.dart';
 import '../../../shared/widgets/status_banner.dart';
 import '../../../shared/widgets/taji_button.dart';
@@ -65,7 +67,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               const SizedBox(height: 22),
               TajiButton(
                 label: 'Volver a iniciar sesión',
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => context.goNamed(AppRoute.login.name),
               ),
             ],
           )
@@ -101,7 +103,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ),
                 const SizedBox(height: 10),
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => context.goNamed(AppRoute.login.name),
                   child: const Text('← Volver a iniciar sesión'),
                 ),
               ],

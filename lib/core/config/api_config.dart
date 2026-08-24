@@ -46,6 +46,39 @@ class ApiConfig {
     return parsed != null && parsed > 0 ? parsed : fallback;
   }
 
-  static String _normalize(String value) =>
-      value.trim().replaceFirst(RegExp(r'/$'), '');
+  static String _normalize(String value) {
+    final normalized = value.trim().replaceFirst(RegExp(r'/+$'), '');
+    final uri = Uri.tryParse(normalized);
+    if (uri == null ||
+        !uri.hasAuthority ||
+        !{'http', 'https'}.contains(uri.scheme)) {
+      throw const FormatException(
+        'apiBaseUrl debe ser una URL HTTP o HTTPS válida.',
+      );
+    }
+    if (uri.userInfo.isNotEmpty) {
+      throw const FormatException('apiBaseUrl no debe contener credenciales.');
+    }
+    if (uri.scheme == 'http' && !_isPrivateHost(uri.host)) {
+      throw const FormatException(
+        'HTTP solo se permite para localhost, emuladores o una IP privada de la LAN.',
+      );
+    }
+    if (!uri.path.endsWith('/api/v1')) {
+      throw const FormatException('apiBaseUrl debe terminar en /api/v1.');
+    }
+    return normalized;
+  }
+
+  static bool _isPrivateHost(String host) {
+    if (host == 'localhost' || host == '::1') return true;
+    final parts = host.split('.').map(int.tryParse).toList();
+    if (parts.length != 4 || parts.any((part) => part == null)) return false;
+    final first = parts[0]!;
+    final second = parts[1]!;
+    return first == 10 ||
+        first == 127 ||
+        (first == 192 && second == 168) ||
+        (first == 172 && second >= 16 && second <= 31);
+  }
 }

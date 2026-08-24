@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../data/auth_repository.dart';
+import '../../../core/router/app_routes.dart';
 import '../../../shared/widgets/auth_scaffold.dart';
 import '../../../shared/widgets/status_banner.dart';
 import '../../../shared/widgets/taji_button.dart';
@@ -47,7 +49,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _error = '';
     });
     try {
-      final message = await context.read<AuthRepository>().register(
+      await context.read<AuthRepository>().register(
         firstName: _firstName.text,
         lastName: _lastName.text,
         email: _email.text,
@@ -55,9 +57,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: _password.text,
       );
       if (!mounted) return;
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      context.goNamed(
+        AppRoute.login.name,
+        queryParameters: {'registered': '1'},
       );
     } on AuthException catch (exception) {
       if (mounted) setState(() => _error = exception.message);
@@ -162,7 +164,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           const SizedBox(height: 10),
           TextButton(
-            onPressed: _busy ? null : () => Navigator.of(context).pop(),
+            onPressed: _busy
+                ? null
+                : () => context.goNamed(AppRoute.login.name),
             child: const Text('Ya tengo una cuenta'),
           ),
         ],

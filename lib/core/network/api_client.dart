@@ -130,8 +130,11 @@ class ApiClient {
         rotatedRefresh: tokenJson?['refresh'] as String?,
       );
       return access;
-    } on DioException {
-      await tokens.clear();
+    } on DioException catch (error) {
+      final status = error.response?.statusCode;
+      if (status == 400 || status == 401 || status == 403) {
+        await tokens.clear();
+      }
       return null;
     }
   }

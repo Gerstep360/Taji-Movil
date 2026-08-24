@@ -2,17 +2,26 @@ import 'package:dio/dio.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_failure.dart';
 import '../models/taji_user.dart';
 import 'auth_dto.dart';
+import 'auth_session_store.dart';
 
 class AuthException implements Exception {
-  const AuthException(this.message);
-  final String message;
+  const AuthException(this.failure);
+
+  final ApiFailure failure;
+  String get message => failure.displayMessage;
+  String get code => failure.code;
+  Map<String, List<String>> get fields => failure.fields;
 }
 
 class AuthRepository {
-  AuthRepository(this._api);
+  AuthRepository(this._api, {AuthSessionStore? sessionStore})
+    : _session = sessionStore ?? AuthSessionStore();
+
   final ApiClient _api;
+  final AuthSessionStore _session;
 
   Future<TajiUser> login({
     required String email,
@@ -24,23 +33,38 @@ class AuthRepository {
         data: LoginRequest(email: email, password: password).toJson(),
       );
       final session = AuthSessionResponse.fromJson(json!);
-      await _api.tokens.save(session.tokens);
+      await Future.wait([
+        _api.tokens.save(session.tokens),
+        _session.saveUser(session.user),
+      ]);
       return session.user;
     } on DioException catch (error) {
       throw AuthException(
-        _messageFrom(error, 'Correo o contraseña incorrectos.'),
+        ApiFailure.fromDio(error, fallback: 'Correo o contraseña incorrectos.'),
       );
     }
   }
 
   Future<TajiUser?> restoreSession() async {
-    if (!await _api.tokens.hasRefresh) return null;
+    if (!await _api.tokens.hasRefresh) {
+      await _session.clear();
+      return null;
+    }
+    final cachedUser = await _session.readUser();
     try {
       final json = await _api.get<Map<String, dynamic>>(ApiEndpoints.auth.me);
-      return TajiUser.fromJson(json!['user'] as Map<String, dynamic>);
-    } on DioException {
-      await _api.tokens.clear();
-      return null;
+      final user = TajiUser.fromJson(json!['user'] as Map<String, dynamic>);
+      await _session.saveUser(user);
+      return user;
+    } on DioException catch (error) {
+      final status = error.response?.statusCode;
+      if (status == 401 || status == 403) {
+        await Future.wait([_api.tokens.clear(), _session.clear()]);
+        return null;
+      }
+      // Sin red o con una caída temporal conservamos la sesión local; el
+      // interceptor renovará el access token cuando el servidor vuelva.
+      return cachedUser;
     }
   }
 
@@ -68,7 +92,9 @@ class AuthRepository {
         'Cuenta creada correctamente.',
       ).message;
     } on DioException catch (error) {
-      throw AuthException(_messageFrom(error, 'No pudimos crear tu cuenta.'));
+      throw AuthException(
+        ApiFailure.fromDio(error, fallback: 'No pudimos crear tu cuenta.'),
+      );
     }
   }
 
@@ -80,7 +106,9 @@ class AuthRepository {
       );
       return MessageResponse.fromJson(json, 'Revisa tu correo.').message;
     } on DioException catch (error) {
-      throw AuthException(_messageFrom(error, 'No pudimos enviar el enlace.'));
+      throw AuthException(
+        ApiFailure.fromDio(error, fallback: 'No pudimos enviar el enlace.'),
+      );
     }
   }
 
@@ -92,24 +120,7 @@ class AuthRepository {
         data: {'refresh': refresh},
       );
     } finally {
-      await _api.tokens.clear();
+      await Future.wait([_api.tokens.clear(), _session.clear()]);
     }
-  }
-
-  String _messageFrom(DioException error, String fallback) {
-    final data = error.response?.data;
-    if (data is Map<String, dynamic>) {
-      final detail = data['detail'];
-      if (detail is String) return detail;
-      for (final value in data.values) {
-        if (value is String) return value;
-        if (value is List && value.isNotEmpty) return value.first.toString();
-      }
-    }
-    if (error.type == DioExceptionType.connectionError ||
-        error.type == DioExceptionType.connectionTimeout) {
-      return 'No se pudo conectar con Taji. Revisa la red y assets/config/app_config.json.';
-    }
-    return fallback;
   }
 }

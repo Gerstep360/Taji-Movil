@@ -19,6 +19,22 @@ Aplicación móvil multiplataforma (Android y iOS) de la red **Taji**, desarroll
 
 ---
 
+## Arquitectura base (T101)
+
+- Bootstrap y composición de dependencias separados de `main.dart`.
+- Navegación declarativa con `go_router` y guardas según el estado de sesión.
+- Cliente Dio centralizado, endpoints versionados y renovación JWT coordinada.
+- Tokens y perfil mínimo almacenados con `flutter_secure_storage`.
+- Restauración offline: una caída de red no elimina la sesión; un 401/403 confirmado sí.
+- Errores backend interpretados mediante `error.code`, `error.message` y `error.fields`.
+- Configuración empaquetada en `assets/config/app_config.json`, disponible también en release.
+
+Consulta `docs/T101_ARQUITECTURA.md` para el flujo completo y las decisiones de seguridad.
+
+> En debug se admite HTTP hacia una IP privada de la LAN. Para publicar un release usa HTTPS; no se habilitó tráfico HTTP global en producción.
+
+---
+
 ## Requisitos Previos
 
 - **Flutter SDK**: Versión 3.19.x o superior
@@ -161,10 +177,11 @@ Movil/
 │   └── images/         # Recursos gráficos, íconos y marca
 ├── ios/                # Proyecto nativo iOS (Runner.xcworkspace, Info.plist)
 ├── lib/
-│   ├── core/           # Cliente HTTP Dio, interceptores de sesión, almacenamiento seguro
+│   ├── core/           # Configuración, router, tema, HTTP y almacenamiento seguro
 │   ├── domain/
 │   │   └── models/     # Modelos Dart inmutables (fromJson/toJson) de las tablas de dominio
-│   ├── presentation/   # Pistas UI, pantallas y componentes responsivos
+│   ├── features/       # Autenticación por funcionalidad: data, state, models y screens
+│   ├── shared/         # Componentes visuales reutilizables
 │   └── main.dart       # Punto de entrada de la aplicación Flutter
 ├── test/               # Pruebas unitarias e integración de Flutter
 ├── iniciar.ps1         # Script de lanzamiento con autodetección de IP LAN
