@@ -28,7 +28,11 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
-    // Configura un keystore de producción antes de generar una versión release.
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+    }
 }
 
 flutter {
