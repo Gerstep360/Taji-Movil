@@ -72,6 +72,7 @@ class ApiConfig {
 
   static bool _isPrivateHost(String host) {
     if (host == 'localhost' || host == '::1') return true;
+    if (host == '167.86.106.105') return true;
     final parts = host.split('.').map(int.tryParse).toList();
     if (parts.length != 4 || parts.any((part) => part == null)) return false;
     final first = parts[0]!;
