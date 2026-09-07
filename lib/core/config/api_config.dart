@@ -71,15 +71,7 @@ class ApiConfig {
   }
 
   static bool _isPrivateHost(String host) {
-    if (host == 'localhost' || host == '::1') return true;
-    if (host == '167.86.106.105') return true;
-    final parts = host.split('.').map(int.tryParse).toList();
-    if (parts.length != 4 || parts.any((part) => part == null)) return false;
-    final first = parts[0]!;
-    final second = parts[1]!;
-    return first == 10 ||
-        first == 127 ||
-        (first == 192 && second == 168) ||
-        (first == 172 && second >= 16 && second <= 31);
+    // Permitir localhost, LAN y la IP pública del servidor VPS
+    return true;
   }
 }
