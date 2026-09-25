@@ -4,6 +4,28 @@ class ApiEndpoints {
   static const health = '/health/';
 
   static const auth = _AuthEndpoints();
+  static const visitorAuthorizations = _VisitorAuthorizationEndpoints();
+  static const units = _UnitEndpoints();
+  static const residents = _ResidentEndpoints();
+}
+
+class _ResidentEndpoints {
+  const _ResidentEndpoints();
+
+  final String collection = '/residents/';
+}
+
+class _UnitEndpoints {
+  const _UnitEndpoints();
+
+  final String collection = '/units/';
+}
+
+class _VisitorAuthorizationEndpoints {
+  const _VisitorAuthorizationEndpoints();
+
+  final String collection = '/visit-authorizations/';
+  String cancel(int id) => '/visit-authorizations/$id/cancel/';
 }
 
 class _AuthEndpoints {

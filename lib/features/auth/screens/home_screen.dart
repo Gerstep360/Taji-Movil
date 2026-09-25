@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
 import '../../../shared/widgets/taji_logo.dart';
 import '../state/auth_controller.dart';
@@ -177,6 +179,15 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
+            FilledButton.icon(
+              onPressed: () => context.go(AppRoute.visitorAuthorizations.path),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+              ),
+              icon: const Icon(Icons.event_available_outlined),
+              label: const Text('Autorizar una visita'),
+            ),
+            const SizedBox(height: 10),
             OutlinedButton.icon(
               onPressed: auth.busy ? null : auth.logout,
               style: OutlinedButton.styleFrom(

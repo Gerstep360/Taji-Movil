@@ -35,6 +35,7 @@ class TajiUser {
     required this.fullName,
     required this.phone,
     this.role,
+    this.residentUnits = const [],
   });
 
   final int id;
@@ -44,6 +45,7 @@ class TajiUser {
   final String fullName;
   final String phone;
   final TajiRole? role;
+  final List<Map<String, dynamic>> residentUnits;
 
   String get initials {
     final first = firstName.isEmpty ? '' : firstName[0];
@@ -61,6 +63,10 @@ class TajiUser {
     role: json['role'] is Map<String, dynamic>
         ? TajiRole.fromJson(json['role'] as Map<String, dynamic>)
         : null,
+    residentUnits: List<Map<String, dynamic>>.from(
+      (json['resident_units'] as List? ?? const [])
+          .whereType<Map<String, dynamic>>(),
+    ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -71,5 +77,6 @@ class TajiUser {
     'full_name': fullName,
     'phone': phone,
     'role': role?.toJson(),
+    'resident_units': residentUnits,
   };
 }

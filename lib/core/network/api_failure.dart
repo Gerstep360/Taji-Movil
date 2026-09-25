@@ -105,6 +105,13 @@ class ApiFailure implements Exception {
         'phone': 'Teléfono',
         'password': 'Contraseña',
         'password_confirm': 'Confirmación',
+        'visitor_first_name': 'Nombre',
+        'visitor_last_name': 'Apellido',
+        'visitor_document_number': 'Documento',
+        'unit_id': 'Unidad',
+        'valid_from': 'Fecha inicial',
+        'valid_until': 'Fecha final',
+        'purpose': 'Motivo',
         'token': 'Enlace',
       }[field] ??
       'Datos';

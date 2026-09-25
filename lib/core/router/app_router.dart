@@ -6,6 +6,7 @@ import '../../features/auth/screens/home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/visitors/screens/visitor_authorizations_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
 
@@ -41,6 +42,11 @@ class AppRouter {
         builder: (_, __) => const ForgotPasswordScreen(),
       ),
       GoRoute(
+        path: AppRoute.visitorAuthorizations.path,
+        name: AppRoute.visitorAuthorizations.name,
+        builder: (_, __) => const VisitorAuthorizationsScreen(),
+      ),
+      GoRoute(
         path: AppRoute.home.path,
         name: AppRoute.home.name,
         builder: (_, __) => const HomeScreen(),
@@ -65,7 +71,12 @@ class AppRouter {
           ? AppRoute.login.path
           : null;
     }
-    return location == AppRoute.home.path ? null : AppRoute.home.path;
+    return {
+          AppRoute.home.path,
+          AppRoute.visitorAuthorizations.path,
+        }.contains(location)
+        ? null
+        : AppRoute.home.path;
   }
 }
 
