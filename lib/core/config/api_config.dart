@@ -17,6 +17,11 @@ class ApiConfig {
   /// Carga la configuración empaquetada en el APK/IPA.
   /// No depende de --dart-define, por lo que funciona igual en release.
   static Future<void> initialize({AssetBundle? bundle}) async {
+    const envUrl = String.fromEnvironment('API_BASE_URL');
+    if (envUrl.isNotEmpty) {
+      _baseUrl = _normalize(envUrl);
+      return;
+    }
     final source = await (bundle ?? rootBundle).loadString(assetPath);
     final json = jsonDecode(source) as Map<String, dynamic>;
     _baseUrl = _normalize(_requiredString(json, 'apiBaseUrl'));
