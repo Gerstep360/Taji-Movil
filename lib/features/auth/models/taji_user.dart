@@ -1,3 +1,31 @@
+class TajiTenant {
+  const TajiTenant({
+    required this.id,
+    required this.name,
+    required this.slug,
+    this.address = '',
+  });
+
+  final int id;
+  final String name;
+  final String slug;
+  final String address;
+
+  factory TajiTenant.fromJson(Map<String, dynamic> json) => TajiTenant(
+    id: json['id'] as int? ?? 0,
+    name: json['name'] as String? ?? '',
+    slug: json['slug'] as String? ?? '',
+    address: json['address'] as String? ?? '',
+  );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'slug': slug,
+    'address': address,
+  };
+}
+
 class TajiRole {
   const TajiRole({
     required this.slug,
@@ -35,6 +63,7 @@ class TajiUser {
     required this.fullName,
     required this.phone,
     this.role,
+    this.activeTenant,
     this.residentUnits = const [],
   });
 
@@ -45,6 +74,7 @@ class TajiUser {
   final String fullName;
   final String phone;
   final TajiRole? role;
+  final TajiTenant? activeTenant;
   final List<Map<String, dynamic>> residentUnits;
 
   String get initials {
@@ -63,6 +93,9 @@ class TajiUser {
     role: json['role'] is Map<String, dynamic>
         ? TajiRole.fromJson(json['role'] as Map<String, dynamic>)
         : null,
+    activeTenant: json['active_tenant'] is Map<String, dynamic>
+        ? TajiTenant.fromJson(json['active_tenant'] as Map<String, dynamic>)
+        : null,
     residentUnits: List<Map<String, dynamic>>.from(
       (json['resident_units'] as List? ?? const [])
           .whereType<Map<String, dynamic>>(),
@@ -77,6 +110,7 @@ class TajiUser {
     'full_name': fullName,
     'phone': phone,
     'role': role?.toJson(),
+    'active_tenant': activeTenant?.toJson(),
     'resident_units': residentUnits,
   };
 }
@@ -92,12 +126,17 @@ extension TajiUserAccess on TajiUser {
 
   /// Personal de seguridad y administración: puede escanear y validar QR en
   /// portería. El rol `seguridad` y el `administrador` lo tienen; el resto no.
-  bool get canValidateVisits => hasPermission('validate_visits');
+  bool get canValidateVisits =>
+      isAdmin || hasPermission('validate_visits') || role?.slug == 'seguridad';
 
   /// Residentes y administración: pueden emitir el QR de sus visitas. El rol
   /// `seguridad` queda excluido a propósito, igual que en el backend.
   bool get canIssueVisitQr =>
-      hasPermission('register_visits') || hasPermission('manage_visits');
+      isAdmin ||
+      hasPermission('register_visits') ||
+      hasPermission('manage_visits') ||
+      role?.slug == 'residente' ||
+      role == null;
 
-  bool get isAdmin => role?.slug == 'administrador';
+  bool get isAdmin => role?.slug == 'administrador' || role?.slug == 'superadmin';
 }

@@ -9,6 +9,7 @@ class ApiEndpoints {
   static const visitQr = _VisitQrEndpoints();
   static const units = _UnitEndpoints();
   static const residents = _ResidentEndpoints();
+  static const publicCondominiums = '/saas/condominiums/public/';
 }
 
 class _SecurityEndpoints {

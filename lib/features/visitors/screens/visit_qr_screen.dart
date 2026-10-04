@@ -45,7 +45,15 @@ class _VisitQrScreenState extends State<VisitQrScreen> {
       context.read<VisitQrDataSource>(),
       authorizationId: widget.authorizationId,
     );
-    _controller.load();
+    _initQr();
+  }
+
+  Future<void> _initQr() async {
+    await _controller.load();
+    if (!mounted) return;
+    if (!_controller.hasQrImage && !_controller.isBlockedByStatus) {
+      await _generate(force: true, silent: true);
+    }
   }
 
   @override
@@ -54,14 +62,14 @@ class _VisitQrScreenState extends State<VisitQrScreen> {
     super.dispose();
   }
 
-  Future<void> _generate({bool force = false}) async {
+  Future<void> _generate({bool force = false, bool silent = false}) async {
     final hasImage = await _controller.generate(force: force);
     if (!mounted) return;
     if (_controller.error != null) {
       _message(_controller.error!);
       return;
     }
-    if (hasImage) {
+    if (hasImage && !silent) {
       final rotated = _controller.ticket?.rotated ?? false;
       _message(
         rotated
@@ -118,11 +126,14 @@ class _VisitQrScreenState extends State<VisitQrScreen> {
                 else if (_controller.isBlockedByStatus) ...[
                   _BlockedStatus(
                     authorization: _controller.authorization!,
-                    onGenerate: () => _generate(),
+                    onGenerate: () => _generate(force: true),
                     busy: _controller.generating,
                   ),
                 ] else ...[
-                  _QrCard(controller: _controller),
+                  _QrCard(
+                    controller: _controller,
+                    onGenerate: () => _generate(force: true),
+                  ),
                   const SizedBox(height: 14),
                   QrExpiryPanel(
                     remainingSeconds: _controller.remainingSeconds,
@@ -145,7 +156,7 @@ class _VisitQrScreenState extends State<VisitQrScreen> {
                   const SizedBox(height: 18),
                   _Actions(
                     controller: _controller,
-                    onGenerate: () => _generate(),
+                    onGenerate: () => _generate(force: true),
                     onNew: () => _generate(force: true),
                     onRotate: () => _rotate(),
                   ),
@@ -213,13 +224,37 @@ class _Header extends StatelessWidget {
 }
 
 class _QrCard extends StatelessWidget {
-  const _QrCard({required this.controller});
+  const _QrCard({required this.controller, required this.onGenerate});
   final VisitQrController controller;
+  final VoidCallback onGenerate;
 
   @override
   Widget build(BuildContext context) {
+    if (controller.generating) {
+      return Container(
+        height: 280,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: TajiColors.border),
+        ),
+        child: const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 14),
+              Text(
+                'Generando código QR temporal...',
+                style: TextStyle(color: TajiColors.muted, fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     if (!controller.hasQrImage) {
-      return const _QrPlaceholder();
+      return _QrPlaceholder(onGenerate: onGenerate);
     }
     final dimmed = controller.isExpired;
     return Container(
@@ -313,7 +348,8 @@ class _CodeNotice extends StatelessWidget {
 }
 
 class _QrPlaceholder extends StatelessWidget {
-  const _QrPlaceholder();
+  const _QrPlaceholder({this.onGenerate});
+  final VoidCallback? onGenerate;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -323,20 +359,39 @@ class _QrPlaceholder extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       border: Border.all(color: TajiColors.border),
     ),
-    child: const Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.qr_code_2_outlined, size: 54, color: TajiColors.border),
-        SizedBox(height: 12),
-        Text(
-          'Todavía no hay un QR emitido',
-          style: TextStyle(
-            color: TajiColors.muted,
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
+    child: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.qr_code_2_rounded, size: 54, color: Color(0xFF0F6FFF)),
+          const SizedBox(height: 12),
+          const Text(
+            'Código QR no generado',
+            style: TextStyle(
+              color: TajiColors.ink,
+              fontWeight: FontWeight.w800,
+              fontSize: 15,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          const Text(
+            'Presiona el botón para generar el pase de acceso seguro.',
+            style: TextStyle(color: TajiColors.muted, fontSize: 12),
+          ),
+          if (onGenerate != null) ...[
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: onGenerate,
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF0F6FFF),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              icon: const Icon(Icons.flash_on_rounded, size: 18),
+              label: const Text('Generar Pase QR', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ],
+      ),
     ),
   );
 }

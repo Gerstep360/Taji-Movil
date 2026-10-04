@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/network/api_client.dart';
 import '../../../core/theme/taji_theme.dart';
+import '../../../core/utils/camera_permission.dart';
 import '../../../domain/models/security_models.dart';
 import '../data/face_verification_repository.dart';
 import '../state/face_verification_controller.dart';
@@ -38,6 +40,97 @@ class _FaceVerificationViewState extends State<_FaceVerificationView> {
   void dispose() {
     _notesController.dispose();
     super.dispose();
+  }
+
+  final _picker = ImagePicker();
+
+  Future<void> _pickImage(FaceVerificationController controller, ImageSource source) async {
+    if (source == ImageSource.camera) {
+      final granted = await CameraPermissionHelper.ensureCameraPermission(context);
+      if (!granted) return;
+    }
+
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+        preferredCameraDevice: CameraDevice.front,
+      );
+
+      if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
+        final base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+        controller.setCapturedImage(base64Image);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al capturar imagen: $e')),
+        );
+      }
+    }
+  }
+
+  void _showCaptureOptions(FaceVerificationController controller) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Captura Biométrica Facial',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined, color: TajiColors.primary),
+                title: const Text('Tomar foto con la cámara'),
+                subtitle: const Text('Usa la cámara del dispositivo'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImage(controller, ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined, color: TajiColors.primary),
+                title: const Text('Seleccionar de la galería'),
+                subtitle: const Text('Elegir foto existente'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImage(controller, ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.science_outlined, color: Colors.indigo),
+                title: const Text('Cargar imagen de prueba (Demo)'),
+                subtitle: const Text('Para pruebas sin cámara física'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _generateDemoPhoto(controller);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // Generar foto sintética o de demostración biométrica si no se selecciona cámara física
@@ -108,55 +201,63 @@ class _FaceVerificationViewState extends State<_FaceVerificationView> {
               const SizedBox(height: 20),
 
               // Viewport de Captura Fotográfica
-              Container(
-                height: 260,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF090D16),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white12),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (controller.capturedImage != null)
-                        Image.memory(
-                          base64Decode(
-                            controller.capturedImage!.contains(',')
-                                ? controller.capturedImage!.split(',')[1]
-                                : controller.capturedImage!,
-                          ),
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Center(
-                            child: Icon(Icons.person, size: 96, color: Colors.white24),
-                          ),
-                        )
-                      else
-                        const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.camera_alt_outlined, size: 56, color: Colors.white38),
-                            SizedBox(height: 12),
-                            Text(
-                              'Capture o seleccione una foto',
-                              style: TextStyle(color: Colors.white54, fontSize: 13),
+              GestureDetector(
+                onTap: () => _showCaptureOptions(controller),
+                child: Container(
+                  height: 260,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF090D16),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white12),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (controller.capturedImage != null)
+                          Image.memory(
+                            base64Decode(
+                              controller.capturedImage!.contains(',')
+                                  ? controller.capturedImage!.split(',')[1]
+                                  : controller.capturedImage!,
                             ),
-                          ],
-                        ),
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Center(
+                              child: Icon(Icons.person, size: 96, color: Colors.white24),
+                            ),
+                          )
+                        else
+                          const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.camera_alt_outlined, size: 56, color: Colors.white38),
+                              SizedBox(height: 12),
+                              Text(
+                                'Toca aquí para capturar o elegir foto',
+                                style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'Cámara frontal / trasera o galería',
+                                style: TextStyle(color: Colors.white38, fontSize: 11),
+                              ),
+                            ],
+                          ),
 
-                      // Marcos de Escaneo Facial Overlay
-                      Container(
-                        width: 170,
-                        height: 210,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(80),
-                          border: Border.all(color: const Color(0xFF38BDF8), width: 2.5),
+                        // Marcos de Escaneo Facial Overlay
+                        Container(
+                          width: 170,
+                          height: 210,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(80),
+                            border: Border.all(color: const Color(0xFF38BDF8), width: 2.5),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -168,8 +269,8 @@ class _FaceVerificationViewState extends State<_FaceVerificationView> {
                 children: [
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () => _generateDemoPhoto(controller),
-                      icon: const Icon(Icons.camera),
+                      onPressed: () => _showCaptureOptions(controller),
+                      icon: const Icon(Icons.camera_alt_outlined),
                       label: const Text('Capturar Foto'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),

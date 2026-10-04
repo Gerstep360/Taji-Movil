@@ -42,6 +42,8 @@ dependencies:
   qr_flutter: ^4.1.0
   # CU10 / RF-10 (T106): lector de QR en portería.
   mobile_scanner: ^7.1.3
+  permission_handler: ^13.0.2
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:

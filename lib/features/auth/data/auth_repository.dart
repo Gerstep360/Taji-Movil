@@ -38,8 +38,16 @@ class AuthRepository {
         _session.saveUser(session.user),
       ]);
       try {
-        return await _loadCurrentUser();
+        final user = await _loadCurrentUser();
+        if (user.activeTenant != null) {
+          await _api.tokens.setTenantId(user.activeTenant!.id.toString());
+        }
+        await _session.saveUser(user);
+        return user;
       } on DioException {
+        if (session.user.activeTenant != null) {
+          await _api.tokens.setTenantId(session.user.activeTenant!.id.toString());
+        }
         return session.user;
       }
     } on DioException catch (error) {
@@ -62,6 +70,9 @@ class AuthRepository {
     final cachedUser = await _session.readUser();
     try {
       final user = await _loadCurrentUser();
+      if (user.activeTenant != null) {
+        await _api.tokens.setTenantId(user.activeTenant!.id.toString());
+      }
       await _session.saveUser(user);
       return user;
     } on DioException catch (error) {
@@ -72,6 +83,9 @@ class AuthRepository {
       }
       // Sin red o con una caída temporal conservamos la sesión local; el
       // interceptor renovará el access token cuando el servidor vuelva.
+      if (cachedUser?.activeTenant != null) {
+        await _api.tokens.setTenantId(cachedUser!.activeTenant!.id.toString());
+      }
       return cachedUser;
     }
   }
@@ -82,6 +96,8 @@ class AuthRepository {
     required String email,
     required String phone,
     required String password,
+    int? condominiumId,
+    String? unitLabel,
   }) async {
     try {
       final request = RegisterRequest(
@@ -90,6 +106,8 @@ class AuthRepository {
         email: email,
         phone: phone,
         password: password,
+        condominiumId: condominiumId,
+        unitLabel: unitLabel,
       );
       final json = await _api.post<Map<String, dynamic>>(
         ApiEndpoints.auth.register,
@@ -103,6 +121,20 @@ class AuthRepository {
       throw AuthException(
         ApiFailure.fromDio(error, fallback: 'No pudimos crear tu cuenta.'),
       );
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getPublicCondominiums() async {
+    try {
+      final response = await _api.get<dynamic>(
+        ApiEndpoints.publicCondominiums,
+      );
+      if (response is List) {
+        return response.cast<Map<String, dynamic>>();
+      }
+      return [];
+    } on DioException {
+      return [];
     }
   }
 

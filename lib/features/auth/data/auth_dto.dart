@@ -20,12 +20,16 @@ class RegisterRequest {
     required this.email,
     required this.phone,
     required this.password,
+    this.condominiumId,
+    this.unitLabel,
   });
   final String firstName;
   final String lastName;
   final String email;
   final String phone;
   final String password;
+  final int? condominiumId;
+  final String? unitLabel;
 
   Map<String, dynamic> toJson() => {
     'first_name': firstName.trim(),
@@ -34,6 +38,9 @@ class RegisterRequest {
     'phone': phone.trim(),
     'password': password,
     'password_confirm': password,
+    if (condominiumId != null) 'condominium_id': condominiumId,
+    if (unitLabel != null && unitLabel!.trim().isNotEmpty)
+      'unit_label': unitLabel!.trim(),
   };
 }
 

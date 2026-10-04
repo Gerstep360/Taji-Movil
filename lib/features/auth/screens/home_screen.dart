@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
+import '../../../shared/widgets/taji_drawer.dart';
 import '../../../shared/widgets/taji_logo.dart';
-import '../models/taji_user.dart';
 import '../state/auth_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -16,10 +16,19 @@ class HomeScreen extends StatelessWidget {
     final auth = context.watch<AuthController>();
     final user = auth.user!;
     final role = user.role;
+
     return Scaffold(
+      drawer: const TajiDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
+        leading: Builder(
+          builder: (ctx) => IconButton(
+            icon: const Icon(Icons.menu_rounded, color: TajiColors.ink),
+            tooltip: 'Menú principal',
+            onPressed: () => Scaffold.of(ctx).openDrawer(),
+          ),
+        ),
         title: const TajiLogo(),
         actions: [
           Padding(
@@ -43,7 +52,7 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 30),
           children: [
             Text(
-              'PANEL PERSONAL',
+              'PANEL PRINCIPAL',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: TajiColors.muted,
                 fontWeight: FontWeight.w700,
@@ -52,24 +61,68 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 5),
             Text(
-              'Hola, ${user.firstName} 👋',
-              style: Theme.of(context).textTheme.headlineSmall,
+              'Hola, ${user.firstName}',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: TajiColors.ink,
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFDBEAFE)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.business_rounded, color: TajiColors.primary, size: 14),
+                      const SizedBox(width: 6),
+                      Text(
+                        user.activeTenant?.name ?? 'Condominio Taji',
+                        style: const TextStyle(
+                          color: TajiColors.primaryStrong,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (user.activeTenant?.slug != null && user.activeTenant!.slug.isNotEmpty) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          '· ${user.activeTenant!.slug}',
+                          style: const TextStyle(
+                            color: TajiColors.muted,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+
+            // WELCOME HERO CARD
             Container(
-              padding: const EdgeInsets.all(23),
+              padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [Color(0xFF075FDD), Color(0xFF1489FF)],
                 ),
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(22),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x2B0F6FFF),
-                    blurRadius: 30,
-                    offset: Offset(0, 15),
+                    blurRadius: 24,
+                    offset: Offset(0, 12),
                   ),
                 ],
               ),
@@ -79,288 +132,135 @@ class HomeScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,
-                      vertical: 6,
+                      vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: .15),
+                      color: Colors.white.withValues(alpha: .18),
                       borderRadius: BorderRadius.circular(30),
                     ),
-                    child: const Text(
-                      'ACCESO CONFIRMADO',
-                      style: TextStyle(
+                    child: Text(
+                      role?.name.toUpperCase() ?? 'RESIDENTE',
+                      style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 9,
+                        fontSize: 9.5,
                         fontWeight: FontWeight.w800,
                         letterSpacing: .8,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   const Text(
-                    'Bienvenido a tu\ncomunidad Taji',
+                    'Comunidad Conectada\ny Segura',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 27,
-                      height: 1.06,
+                      fontSize: 24,
+                      height: 1.1,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -1.1,
+                      letterSpacing: -0.8,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   const Text(
-                    'Tu cuenta está lista. Los módulos se habilitarán en las siguientes etapas.',
+                    'Accede a los módulos de seguridad, pases QR y biometría desde los accesos rápidos o el menú lateral.',
                     style: TextStyle(
-                      color: Color(0xC9FFFFFF),
-                      height: 1.5,
-                      fontSize: 13,
+                      color: Color(0xE0FFFFFF),
+                      height: 1.45,
+                      fontSize: 12.5,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+
+            const SizedBox(height: 24),
+
+            // QUICK ACTIONS TITLE
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'MÓDULOS DISPONIBLES',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: TajiColors.muted,
+                  ),
+                ),
+                Text(
+                  'Paquete 2: Seguridad',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: TajiColors.primary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // ACTION CARDS
             _ActionCard(
-              icon: Icons.face_retouching_natural,
-              iconColor: const Color(0xFF4F46E5),
-              iconBackground: const Color(0xFFEEF2FF),
-              title: 'Verificación Facial (CU17)',
-              subtitle: 'Escaneo fotográfico y confirmación humana (RF-17)',
-              onTap: () => context.push(AppRoute.faceVerification.path),
+              icon: Icons.qr_code_2_rounded,
+              iconColor: const Color(0xFF0F6FFF),
+              iconBackground: const Color(0xFFEAF4FF),
+              title: 'Pases QR de Visita (CU09)',
+              subtitle: 'Genera códigos QR temporales y seguros para tus visitas',
+              onTap: () => context.push(AppRoute.visitorAuthorizations.path),
             ),
             const SizedBox(height: 10),
+            _ActionCard(
+              icon: Icons.qr_code_scanner_rounded,
+              iconColor: const Color(0xFF059669),
+              iconBackground: const Color(0xFFECFDF5),
+              title: 'Lector QR en Portería (CU10)',
+              subtitle: 'Escaneo con cámara y verificación de validez de visitas',
+              onTap: () => context.push(AppRoute.visitQrScanner.path),
+            ),
+            const SizedBox(height: 10),
+            _ActionCard(
+              icon: Icons.face_retouching_natural_rounded,
+              iconColor: const Color(0xFF7C3AED),
+              iconBackground: const Color(0xFFF5F3FF),
+              title: 'Verificación Facial (CU17)',
+              subtitle: 'Captura fotográfica y cotejo biométrico en garita',
+              onTap: () => context.push(AppRoute.faceVerification.path),
+            ),
+
+            const SizedBox(height: 24),
+
+            // SYSTEM STATUS CARDS
+            const Text(
+              'ESTADO DE LA CUENTA',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.8,
+                color: TajiColors.muted,
+              ),
+            ),
+            const SizedBox(height: 12),
+
             _InfoCard(
               icon: Icons.badge_outlined,
               iconColor: TajiColors.primary,
               iconBackground: TajiColors.primarySoft,
-              label: 'Tu rol',
+              label: 'Rol asignado',
               value: role?.name ?? 'Sin asignar',
             ),
             const SizedBox(height: 10),
             const _InfoCard(
               icon: Icons.verified_user_outlined,
               iconColor: TajiColors.success,
-              iconBackground: Color(0xFFE5F9F0),
-              label: 'Estado de cuenta',
-              value: 'Activa y protegida',
-            ),
-            const SizedBox(height: 18),
-            _Panel(
-              title: 'Permisos de tu rol',
-              child: Wrap(
-                spacing: 7,
-                runSpacing: 7,
-                children: (role?.permissions ?? [])
-                    .map(
-                      (permission) => Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FBFF),
-                          border: Border.all(color: const Color(0xFFDFE9F7)),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          _permissionLabel(permission),
-                          style: const TextStyle(
-                            color: Color(0xFF47627F),
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _Panel(
-              title: 'Tus datos',
-              child: Column(
-                children: [
-                  _DataRow(label: 'Nombre', value: user.fullName),
-                  _DataRow(label: 'Correo', value: user.email),
-                  _DataRow(
-                    label: 'Teléfono',
-                    value: user.phone.isEmpty ? 'No registrado' : user.phone,
-                    last: true,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 18),
-            // T106 / CU10: el lector solo se ofrece a quien el backend autoriza
-            // a validar, es decir, quien tiene el permiso `validate_visits`
-            // (personal de seguridad y administración).
-            if (user.canValidateVisits) ...[
-              FilledButton.icon(
-                onPressed: () => context.push(AppRoute.visitQrScanner.path),
-                style: FilledButton.styleFrom(
-                  minimumSize: const Size.fromHeight(52),
-                ),
-                icon: const Icon(Icons.qr_code_scanner),
-                label: const Text('Escanear QR de visita'),
-              ),
-              const SizedBox(height: 10),
-            ],
-            FilledButton.icon(
-              onPressed: () => context.go(AppRoute.visitorAuthorizations.path),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-              ),
-              icon: const Icon(Icons.event_available_outlined),
-              label: const Text('Autorizar una visita'),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: auth.busy ? null : auth.logout,
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-                foregroundColor: TajiColors.danger,
-                side: const BorderSide(color: Color(0xFFFFD8DD)),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              icon: const Icon(Icons.logout_rounded, size: 19),
-              label: const Text('Cerrar sesión'),
+              iconBackground: TajiColors.successSoft,
+              label: 'Estado de acceso',
+              value: 'Aprobado y Activo',
             ),
           ],
         ),
       ),
     );
   }
-
-  String _permissionLabel(String code) {
-    final value = code.replaceAll('_', ' ');
-    return '${value[0].toUpperCase()}${value.substring(1)}';
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({
-    required this.icon,
-    required this.iconColor,
-    required this.iconBackground,
-    required this.label,
-    required this.value,
-  });
-  final IconData icon;
-  final Color iconColor;
-  final Color iconBackground;
-  final String label;
-  final String value;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(15),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border.all(color: TajiColors.border),
-      borderRadius: BorderRadius.circular(18),
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: iconBackground,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Icon(icon, color: iconColor, size: 21),
-        ),
-        const SizedBox(width: 13),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(color: TajiColors.muted, fontSize: 11),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                value,
-                style: const TextStyle(
-                  color: TajiColors.ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _Panel extends StatelessWidget {
-  const _Panel({required this.title, required this.child});
-  final String title;
-  final Widget child;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(17),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border.all(color: TajiColors.border),
-      borderRadius: BorderRadius.circular(19),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: TajiColors.ink,
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-          ),
-        ),
-        const SizedBox(height: 14),
-        child,
-      ],
-    ),
-  );
-}
-
-class _DataRow extends StatelessWidget {
-  const _DataRow({required this.label, required this.value, this.last = false});
-  final String label;
-  final String value;
-  final bool last;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(vertical: 10),
-    decoration: BoxDecoration(
-      border: last
-          ? null
-          : const Border(bottom: BorderSide(color: Color(0xFFEDF1F5))),
-    ),
-    child: Row(
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            label,
-            style: const TextStyle(color: TajiColors.muted, fontSize: 11),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: TajiColors.ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class _ActionCard extends StatelessWidget {
@@ -381,22 +281,18 @@ class _ActionCard extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFFC7D2FE), width: 1.5),
             borderRadius: BorderRadius.circular(18),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0F4F46E5),
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
+            border: Border.all(color: TajiColors.border),
           ),
           child: Row(
             children: [
@@ -417,22 +313,91 @@ class _ActionCard extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        color: TajiColors.ink,
-                        fontSize: 14,
                         fontWeight: FontWeight.w700,
+                        fontSize: 14.5,
+                        color: TajiColors.ink,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: TajiColors.muted, fontSize: 11),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: TajiColors.muted,
+                        height: 1.35,
+                      ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 14, color: TajiColors.muted),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right_rounded, color: TajiColors.muted),
             ],
           ),
         ),
-      );
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBackground,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBackground;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: TajiColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: iconBackground,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 11, color: TajiColors.muted, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: TajiColors.ink,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

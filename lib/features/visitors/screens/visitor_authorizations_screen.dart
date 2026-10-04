@@ -20,7 +20,9 @@ class VisitorAuthorizationsScreen extends StatefulWidget {
 }
 
 class _VisitorAuthorizationsScreenState
-    extends State<VisitorAuthorizationsScreen> {
+    extends State<VisitorAuthorizationsScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
   final _formKey = GlobalKey<FormState>();
   late final VisitorAuthorizationController _controller;
   final _firstName = TextEditingController();
@@ -28,6 +30,7 @@ class _VisitorAuthorizationsScreenState
   final _document = TextEditingController();
   final _phone = TextEditingController();
   final _reason = TextEditingController();
+  final _searchQuery = TextEditingController();
   DateTime? _from;
   DateTime? _until;
   int? _unitId;
@@ -35,12 +38,10 @@ class _VisitorAuthorizationsScreenState
   String _documentType = 'CI';
 
   bool get _isAdmin =>
-      context.read<AuthController>().user?.role?.slug == 'administrador';
+      context.read<AuthController>().user?.isAdmin ?? false;
 
-  /// El backend solo permite emitir el QR a quien puede registrar la visita:
-  /// el residente dueño y la administración. Mostrar el botón al resto futile.
   bool get _canIssueQr =>
-      context.read<AuthController>().user?.canIssueVisitQr ?? false;
+      context.read<AuthController>().user?.canIssueVisitQr ?? true;
 
   List<ResidentUnit> get _units {
     final residentUnits =
@@ -57,6 +58,7 @@ class _VisitorAuthorizationsScreenState
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _controller = VisitorAuthorizationController(
       context.read<VisitorAuthorizationRepository>(),
     );
@@ -71,12 +73,14 @@ class _VisitorAuthorizationsScreenState
 
   @override
   void dispose() {
+    _tabController.dispose();
     _controller.dispose();
     _firstName.dispose();
     _lastName.dispose();
     _document.dispose();
     _phone.dispose();
     _reason.dispose();
+    _searchQuery.dispose();
     super.dispose();
   }
 
@@ -101,9 +105,6 @@ class _VisitorAuthorizationsScreenState
         : (_until ?? now.add(const Duration(hours: 3)));
     final date = await showDatePicker(
       context: context,
-      // El emulador puede reportar el cambio de día con una zona horaria
-      // distinta. Permitimos el día anterior para que el usuario pueda
-      // corregir manualmente la fecha local.
       firstDate: DateTime(
         now.year,
         now.month,
@@ -169,7 +170,8 @@ class _VisitorAuthorizationsScreenState
         return _message(_controller.error ?? 'No pudimos registrar la visita.');
       }
       _clearForm();
-      _message('Visita registrada y autorizada correctamente.');
+      _message('Visita registrada. Pase QR generado exitosamente.');
+      _tabController.animateTo(0);
     } on ArgumentError catch (error) {
       _message(error.message.toString());
     }
@@ -194,7 +196,7 @@ class _VisitorAuthorizationsScreenState
       builder: (context) => AlertDialog(
         title: const Text('¿Cancelar autorización?'),
         content: Text(
-          'Se cancelará la visita de ${authorization.visitorName}.',
+          'Se cancelará la visita de ${authorization.visitorName} y su código QR quedará invalidado.',
         ),
         actions: [
           TextButton(
@@ -203,6 +205,7 @@ class _VisitorAuthorizationsScreenState
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: TajiColors.danger),
             child: const Text('Cancelar autorización'),
           ),
         ],
@@ -223,233 +226,281 @@ class _VisitorAuthorizationsScreenState
     }
   }
 
-  /// Abre la pantalla del QR temporal (T105 / CU09) de una autorización.
   void _openQr(VisitorAuthorization item) =>
       context.push(AppRoute.visitQrFor(item.id), extra: item);
 
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('Autorizar visitas'),
+      title: const Text('Pases QR y Visitas (CU09)'),
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.white,
+      bottom: TabBar(
+        controller: _tabController,
+        labelColor: TajiColors.primaryStrong,
+        unselectedLabelColor: TajiColors.muted,
+        indicatorColor: TajiColors.primary,
+        indicatorWeight: 3,
+        tabs: [
+          Tab(
+            icon: const Icon(Icons.qr_code_2_rounded, size: 20),
+            text: 'Pases QR (${_controller.authorizations.length})',
+          ),
+          const Tab(
+            icon: Icon(Icons.person_add_alt_1_rounded, size: 20),
+            text: 'Nueva Visita',
+          ),
+        ],
+      ),
     ),
     body: SafeArea(
       child: AnimatedBuilder(
         animation: _controller,
-        builder: (context, _) => RefreshIndicator(
-          onRefresh: _controller.load,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-            children: [
-              Text(
-                'Registrar una visita',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 5),
-              const Text(
-                'Completa los datos y define cuándo estará autorizada.',
-              ),
-              if (_controller.error != null && !_controller.loading) ...[
-                const SizedBox(height: 10),
-                _ErrorBanner(
-                  message: _controller.error!,
-                  onRetry: _controller.load,
-                ),
-              ],
-              const SizedBox(height: 18),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TajiTextField(
-                      controller: _firstName,
-                      label: 'Nombre',
-                      hint: 'Nombre del visitante',
-                      icon: Icons.person_outline,
-                      textInputAction: TextInputAction.next,
-                      validator: _required,
-                    ),
-                    const SizedBox(height: 12),
-                    TajiTextField(
-                      controller: _lastName,
-                      label: 'Apellido',
-                      hint: 'Apellido del visitante',
-                      icon: Icons.person_outline,
-                      textInputAction: TextInputAction.next,
-                      validator: _required,
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: _documentType,
-                      decoration: const InputDecoration(
-                        labelText: 'Tipo de documento',
-                        prefixIcon: Icon(Icons.badge_outlined, size: 20),
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'CI',
-                          child: Text('Cédula de identidad'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'PASSPORT',
-                          child: Text('Pasaporte'),
-                        ),
-                        DropdownMenuItem(value: 'OTHER', child: Text('Otro')),
-                      ],
-                      onChanged: (value) =>
-                          setState(() => _documentType = value ?? 'CI'),
-                    ),
-                    const SizedBox(height: 12),
-                    TajiTextField(
-                      controller: _document,
-                      label: 'Número de documento',
-                      hint: 'Ej. 12345678',
-                      icon: Icons.numbers,
-                      keyboardType: TextInputType.number,
-                      validator: _required,
-                    ),
-                    const SizedBox(height: 12),
-                    TajiTextField(
-                      controller: _phone,
-                      label: 'Teléfono',
-                      hint: 'Teléfono del visitante',
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<int>(
-                      value: _unitId,
-                      decoration: const InputDecoration(
-                        labelText: 'Unidad',
-                        prefixIcon: Icon(Icons.apartment_outlined, size: 20),
-                      ),
-                      items: _units
-                          .map(
-                            (unit) => DropdownMenuItem(
-                              value: unit.id,
-                              child: Text(unit.code),
+        builder: (context, _) => TabBarView(
+          controller: _tabController,
+          children: [
+            // TAB 0: PASES QR ACTIVOS Y LISTA
+            RefreshIndicator(
+              onRefresh: _controller.load,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Pases QR de Acceso',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: TajiColors.ink,
                             ),
-                          )
-                          .toList(),
-                      onChanged: _units.isEmpty
-                          ? null
-                          : (value) => setState(() => _unitId = value),
-                      validator: (value) =>
-                          value == null ? 'Selecciona una unidad' : null,
-                    ),
-                    if (_isAdmin) ...[
-                      const SizedBox(height: 12),
-                      DropdownButtonFormField<int>(
-                        value: _residentId,
-                        decoration: const InputDecoration(
-                          labelText: 'Residente autorizante',
-                          prefixIcon: Icon(Icons.badge_outlined, size: 20),
-                        ),
-                        items: _controller.residents
-                            .map(
-                              (resident) => DropdownMenuItem(
-                                value: resident.id,
-                                child: Text(
-                                  resident.documentNumber.isEmpty
-                                      ? resident.fullName
-                                      : '${resident.fullName} · ${resident.documentNumber}',
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: _controller.residents.isEmpty
-                            ? null
-                            : (value) => setState(() => _residentId = value),
-                        validator: (value) => value == null
-                            ? 'Selecciona el residente autorizante'
-                            : null,
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Toca "Ver Pase QR" para mostrarlo al guardia o compartirlo.',
+                            style: TextStyle(color: TajiColors.muted, fontSize: 12),
+                          ),
+                        ],
                       ),
                     ],
-                    const SizedBox(height: 12),
-                    TajiTextField(
-                      controller: _reason,
-                      label: 'Motivo',
-                      hint: 'Motivo de la visita',
-                      icon: Icons.notes_outlined,
-                      validator: _required,
+                  ),
+                  const SizedBox(height: 14),
+
+                  if (_controller.error != null && !_controller.loading) ...[
+                    _ErrorBanner(
+                      message: _controller.error!,
+                      onRetry: _controller.load,
                     ),
-                    const SizedBox(height: 12),
-                    Row(
+                    const SizedBox(height: 14),
+                  ],
+
+                  if (_controller.loading)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  else if (!_controller.hasAuthorizations)
+                    _EmptyState(onCreate: () => _tabController.animateTo(1))
+                  else
+                    ..._controller.authorizations.map(
+                      (item) => _AuthorizationCard(
+                        item: item,
+                        cancelling: _controller.cancellingId == item.id,
+                        canIssueQr: _canIssueQr,
+                        onCancel: () => _cancel(item),
+                        onViewQr: () => _openQr(item),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // TAB 1: FORMULARIO DE REGISTRO
+            RefreshIndicator(
+              onRefresh: _controller.load,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+                children: [
+                  Text(
+                    'Registrar una Visita',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: TajiColors.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Completa los datos del visitante y su ventana de acceso.',
+                    style: TextStyle(color: TajiColors.muted, fontSize: 12),
+                  ),
+                  const SizedBox(height: 18),
+                  Form(
+                    key: _formKey,
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: _DateField(
-                            label: 'Desde',
-                            value: _from,
-                            onTap: () => _pickDate(true),
-                          ),
+                        TajiTextField(
+                          controller: _firstName,
+                          label: 'Nombre',
+                          hint: 'Nombre del visitante',
+                          icon: Icons.person_outline,
+                          textInputAction: TextInputAction.next,
+                          validator: _required,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _DateField(
-                            label: 'Hasta',
-                            value: _until,
-                            onTap: () => _pickDate(false),
+                        const SizedBox(height: 12),
+                        TajiTextField(
+                          controller: _lastName,
+                          label: 'Apellido',
+                          hint: 'Apellido del visitante',
+                          icon: Icons.person_outline,
+                          textInputAction: TextInputAction.next,
+                          validator: _required,
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<String>(
+                          value: _documentType,
+                          decoration: const InputDecoration(
+                            labelText: 'Tipo de documento',
+                            prefixIcon: Icon(Icons.badge_outlined, size: 20),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'CI',
+                              child: Text('Cédula de identidad (CI)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'PASSPORT',
+                              child: Text('Pasaporte'),
+                            ),
+                            DropdownMenuItem(value: 'OTHER', child: Text('Otro')),
+                          ],
+                          onChanged: (value) =>
+                              setState(() => _documentType = value ?? 'CI'),
+                        ),
+                        const SizedBox(height: 12),
+                        TajiTextField(
+                          controller: _document,
+                          label: 'Número de documento',
+                          hint: 'Ej. 12345678',
+                          icon: Icons.numbers,
+                          keyboardType: TextInputType.number,
+                          validator: _required,
+                        ),
+                        const SizedBox(height: 12),
+                        TajiTextField(
+                          controller: _phone,
+                          label: 'Teléfono de contacto',
+                          hint: 'Ej. 70012345',
+                          icon: Icons.phone_outlined,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonFormField<int>(
+                          value: _unitId,
+                          decoration: const InputDecoration(
+                            labelText: 'Unidad de destino',
+                            prefixIcon: Icon(Icons.apartment_outlined, size: 20),
+                          ),
+                          items: _units
+                              .map(
+                                (unit) => DropdownMenuItem(
+                                  value: unit.id,
+                                  child: Text('Unidad ${unit.code}'),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: _units.isEmpty
+                              ? null
+                              : (value) => setState(() => _unitId = value),
+                          validator: (value) =>
+                              value == null ? 'Selecciona una unidad' : null,
+                        ),
+                        if (_isAdmin) ...[
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<int>(
+                            value: _residentId,
+                            decoration: const InputDecoration(
+                              labelText: 'Residente autorizante',
+                              prefixIcon: Icon(Icons.badge_outlined, size: 20),
+                            ),
+                            items: _controller.residents
+                                .map(
+                                  (resident) => DropdownMenuItem(
+                                    value: resident.id,
+                                    child: Text(
+                                      resident.documentNumber.isEmpty
+                                          ? resident.fullName
+                                          : '${resident.fullName} (${resident.documentNumber})',
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: _controller.residents.isEmpty
+                                ? null
+                                : (value) => setState(() => _residentId = value),
+                            validator: (value) => value == null
+                                ? 'Selecciona el residente autorizante'
+                                : null,
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        TajiTextField(
+                          controller: _reason,
+                          label: 'Motivo de la visita',
+                          hint: 'Ej. Reunión familiar, entrega...',
+                          icon: Icons.notes_outlined,
+                          validator: _required,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _DateField(
+                                label: 'Desde',
+                                value: _from,
+                                onTap: () => _pickDate(true),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _DateField(
+                                label: 'Hasta',
+                                value: _until,
+                                onTap: () => _pickDate(false),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        FilledButton.icon(
+                          onPressed: _controller.saving ? null : _save,
+                          style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(52),
+                            backgroundColor: TajiColors.primary,
+                          ),
+                          icon: _controller.saving
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Icon(Icons.check_circle_outline),
+                          label: Text(
+                            _controller.saving
+                                ? 'Registrando...'
+                                : 'Registrar y Emitir Pase QR',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 18),
-                    FilledButton.icon(
-                      onPressed: _controller.saving ? null : _save,
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                      ),
-                      icon: _controller.saving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.check_circle_outline),
-                      label: Text(
-                        _controller.saving
-                            ? 'Registrando...'
-                            : 'Registrar y autorizar',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Mis autorizaciones',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text(
-                    '${_controller.authorizations.length}',
-                    style: const TextStyle(color: TajiColors.muted),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              if (_controller.loading)
-                const Padding(
-                  padding: EdgeInsets.all(28),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              if (!_controller.loading && !_controller.hasAuthorizations)
-                const _EmptyState(),
-              if (!_controller.loading)
-                ..._controller.authorizations.map(
-                  (item) => _AuthorizationCard(
-                    item: item,
-                    cancelling: _controller.cancellingId == item.id,
-                    canIssueQr: _canIssueQr,
-                    onCancel: () => _cancel(item),
-                    onViewQr: () => _openQr(item),
-                  ),
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     ),
@@ -534,68 +585,152 @@ class _AuthorizationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = item.isActive;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: active ? const Color(0xFF93C5FD) : TajiColors.border,
+          width: active ? 1.5 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: active ? const Color(0x140F6FFF) : Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: active ? const Color(0xFFEFF6FF) : const Color(0xFFF1F5F9),
+                  child: Icon(
+                    Icons.person_rounded,
+                    color: active ? const Color(0xFF0F6FFF) : TajiColors.muted,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    item.visitorName,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.visitorName,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                          color: TajiColors.ink,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              'Unidad ${item.unit}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: TajiColors.ink,
+                              ),
+                            ),
+                          ),
+                          if (item.documentId.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            Text(
+                              '· ${item.documentId}',
+                              style: const TextStyle(color: TajiColors.muted, fontSize: 11),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 _Status(active: active, cancelled: item.isCancelled),
               ],
             ),
-            if (item.documentId.isNotEmpty) ...[
-              const SizedBox(height: 4),
+            const SizedBox(height: 12),
+            if (item.reason.isNotEmpty) ...[
               Text(
-                'Documento: ${item.documentId}',
-                style: const TextStyle(color: TajiColors.muted, fontSize: 11),
+                'Motivo: ${item.reason}',
+                style: const TextStyle(color: TajiColors.muted, fontSize: 12),
               ),
+              const SizedBox(height: 6),
             ],
-            const SizedBox(height: 5),
-            Text(
-              '${item.unit} · ${item.reason}',
-              style: const TextStyle(color: TajiColors.muted, fontSize: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.schedule_rounded, size: 14, color: TajiColors.muted),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      '${_format(item.validFrom)} — ${_format(item.validUntil)}',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: TajiColors.ink),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              'Válida: ${_format(item.validFrom)} — ${_format(item.validUntil)}',
-              style: const TextStyle(fontSize: 11),
-            ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 14),
             Row(
               children: [
-                if (canIssueQr) ...[
-                  TextButton.icon(
+                Expanded(
+                  child: FilledButton.icon(
                     onPressed: onViewQr,
-                    icon: const Icon(Icons.qr_code_2, size: 17),
-                    label: const Text('Ver QR'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F6FFF),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                    icon: const Icon(Icons.qr_code_2_rounded, size: 20),
+                    label: const Text(
+                      'Ver Pase QR',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
                   ),
-                  const Spacer(),
-                ] else
-                  const Spacer(),
-                if (!item.isCancelled)
-                  TextButton.icon(
+                ),
+                if (!item.isCancelled) ...[
+                  const SizedBox(width: 10),
+                  OutlinedButton.icon(
                     onPressed: cancelling ? null : onCancel,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: TajiColors.danger,
+                      side: const BorderSide(color: Color(0xFFFECDD3)),
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                     icon: cancelling
                         ? const SizedBox(
                             width: 14,
                             height: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(strokeWidth: 2, color: TajiColors.danger),
                           )
-                        : const Icon(Icons.close, size: 16),
-                    label: const Text('Cancelar'),
+                        : const Icon(Icons.close_rounded, size: 16),
+                    label: const Text('Cancelar', style: TextStyle(fontSize: 12)),
                   ),
+                ],
               ],
             ),
           ],
@@ -609,40 +744,99 @@ class _Status extends StatelessWidget {
   const _Status({required this.active, required this.cancelled});
   final bool active;
   final bool cancelled;
+
   @override
-  Widget build(BuildContext context) => Text(
-    cancelled
-        ? 'Cancelada'
+  Widget build(BuildContext context) {
+    final text = cancelled ? 'Cancelada' : active ? 'Activa' : 'Vencida';
+    final bgColor = cancelled
+        ? const Color(0xFFFFE4E6)
         : active
-        ? 'Activa'
-        : 'Vencida',
-    style: TextStyle(
-      color: cancelled || !active ? TajiColors.muted : TajiColors.success,
-      fontSize: 11,
-      fontWeight: FontWeight.w700,
-    ),
-  );
+            ? const Color(0xFFDCFCE7)
+            : const Color(0xFFF1F5F9);
+    final textColor = cancelled
+        ? const Color(0xFFBE123C)
+        : active
+            ? const Color(0xFF15803D)
+            : const Color(0xFF64748B);
+    final borderColor = cancelled
+        ? const Color(0xFFFDA4AF)
+        : active
+            ? const Color(0xFF86EFAC)
+            : const Color(0xFFE2E8F0);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({this.onCreate});
+  final VoidCallback? onCreate;
+
   @override
   Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(22),
+    padding: const EdgeInsets.all(32),
     decoration: BoxDecoration(
       color: Colors.white,
       border: Border.all(color: TajiColors.border),
       borderRadius: BorderRadius.circular(16),
     ),
-    child: const Column(
+    child: Column(
       children: [
-        Icon(
-          Icons.event_available_outlined,
-          color: TajiColors.primary,
-          size: 32,
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF6FF),
+            borderRadius: BorderRadius.circular(32),
+          ),
+          child: const Icon(
+            Icons.qr_code_2_rounded,
+            color: Color(0xFF0F6FFF),
+            size: 36,
+          ),
         ),
-        SizedBox(height: 8),
-        Text('Aún no tienes visitas autorizadas'),
+        const SizedBox(height: 16),
+        const Text(
+          'No tienes pases QR activos',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: TajiColors.ink,
+          ),
+        ),
+        const SizedBox(height: 6),
+        const Text(
+          'Registra una autorización para emitir el código QR de acceso seguro.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: TajiColors.muted),
+        ),
+        if (onCreate != null) ...[
+          const SizedBox(height: 18),
+          FilledButton.icon(
+            onPressed: onCreate,
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF0F6FFF),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            icon: const Icon(Icons.add_rounded, size: 18),
+            label: const Text('Registrar Nueva Visita', style: TextStyle(fontWeight: FontWeight.w700)),
+          ),
+        ],
       ],
     ),
   );

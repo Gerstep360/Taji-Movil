@@ -6,9 +6,11 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/taji_theme.dart';
+import '../../../core/utils/camera_permission.dart';
 import '../../../core/utils/visit_datetime.dart';
 import '../../../shared/widgets/status_banner.dart';
 import '../../../shared/widgets/taji_text_field.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../data/visit_qr_repository.dart';
 import '../models/visit_qr.dart';
 import '../state/visit_qr_validation_controller.dart';
@@ -34,6 +36,7 @@ class _VisitQrScannerScreenState extends State<VisitQrScannerScreen>
   late final MobileScannerController _camera;
   final _manualToken = TextEditingController();
   bool _cameraMounted = true;
+  bool _permissionDenied = false;
   bool _torchOn = false;
   bool _submitting = false;
 
@@ -45,13 +48,51 @@ class _VisitQrScannerScreenState extends State<VisitQrScannerScreen>
       context.read<VisitQrDataSource>(),
     );
     _camera = MobileScannerController(
-      // Solo interesa el QR: descartar el resto de formatos acelera la
-      // detección, que es lo que el guardia nota al apuntar la cámara.
+      autoStart: false,
       formats: const [BarcodeFormat.qrCode],
       detectionSpeed: DetectionSpeed.normal,
       facing: CameraFacing.back,
     );
     _controller.loadReasons();
+    _checkPermissionOnStart();
+  }
+
+  Future<void> _checkPermissionOnStart() async {
+    final granted = await CameraPermissionHelper.ensureCameraPermission(context);
+    if (!mounted) return;
+    if (granted) {
+      setState(() {
+        _permissionDenied = false;
+        _cameraMounted = true;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_camera.start());
+      });
+    } else {
+      setState(() {
+        _permissionDenied = true;
+        _cameraMounted = false;
+      });
+    }
+  }
+
+  Future<void> _retryCamera() async {
+    final granted = await CameraPermissionHelper.ensureCameraPermission(context);
+    if (!mounted) return;
+    if (granted) {
+      setState(() {
+        _permissionDenied = false;
+        _cameraMounted = true;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) unawaited(_camera.start());
+      });
+    } else {
+      setState(() {
+        _permissionDenied = true;
+        _cameraMounted = false;
+      });
+    }
   }
 
   @override
@@ -213,7 +254,7 @@ class _VisitQrScannerScreenState extends State<VisitQrScannerScreen>
         return Stack(
           fit: StackFit.expand,
           children: [
-            if (_cameraMounted)
+            if (_cameraMounted && !_permissionDenied)
               MobileScanner(
                 controller: _camera,
                 onDetect: _onDetect,
@@ -224,9 +265,14 @@ class _VisitQrScannerScreenState extends State<VisitQrScannerScreen>
                     const ColoredBox(color: Colors.black),
                 errorBuilder: (context, error) => _CameraError(
                   error: error,
-                  onRetry: () => unawaited(_camera.start()),
+                  onRetry: _retryCamera,
                   onManualEntry: _openManualEntry,
                 ),
+              )
+            else
+              _CameraPermissionDeniedView(
+                onRetry: _retryCamera,
+                onManualEntry: _openManualEntry,
               ),
             IgnorePointer(
               child: CustomPaint(painter: _ScrimPainter(window: window)),
@@ -923,8 +969,20 @@ class _CameraError extends StatelessWidget {
                   minimumSize: const Size.fromHeight(50),
                 ),
                 icon: const Icon(Icons.refresh, size: 19),
-                label: const Text('Reintentar'),
+                label: Text(denied ? 'Solicitar permiso de cámara' : 'Reintentar'),
               ),
+              if (denied) ...[
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: () => openAppSettings(),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(50),
+                    side: const BorderSide(color: TajiColors.border),
+                  ),
+                  icon: const Icon(Icons.settings_outlined, size: 19),
+                  label: const Text('Abrir Ajustes del Teléfono'),
+                ),
+              ],
               const SizedBox(height: 10),
               OutlinedButton.icon(
                 onPressed: onManualEntry,
@@ -932,6 +990,79 @@ class _CameraError extends StatelessWidget {
                   minimumSize: const Size.fromHeight(50),
                   side: const BorderSide(color: TajiColors.border),
                 ),
+                icon: const Icon(Icons.keyboard_alt_outlined, size: 19),
+                label: const Text('Ingresar código manualmente'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CameraPermissionDeniedView extends StatelessWidget {
+  const _CameraPermissionDeniedView({
+    required this.onRetry,
+    required this.onManualEntry,
+  });
+
+  final VoidCallback onRetry;
+  final VoidCallback onManualEntry;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: TajiColors.canvas,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(26, 60, 26, 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.no_photography_outlined,
+                size: 52,
+                color: TajiColors.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Permiso de Cámara Requerido',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Para escanear pases QR de portería en tiempo real, se requiere acceso a la cámara del dispositivo.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: TajiColors.muted,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 22),
+              FilledButton.icon(
+                onPressed: onRetry,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                ),
+                icon: const Icon(Icons.camera_alt_outlined, size: 19),
+                label: const Text('Conceder Permiso de Cámara'),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: () => openAppSettings(),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  side: const BorderSide(color: TajiColors.border),
+                ),
+                icon: const Icon(Icons.settings_outlined, size: 19),
+                label: const Text('Abrir Ajustes del Teléfono'),
+              ),
+              const SizedBox(height: 10),
+              TextButton.icon(
+                onPressed: onManualEntry,
                 icon: const Icon(Icons.keyboard_alt_outlined, size: 19),
                 label: const Text('Ingresar código manualmente'),
               ),
