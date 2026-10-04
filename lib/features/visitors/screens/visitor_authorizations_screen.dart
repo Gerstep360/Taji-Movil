@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
 import '../../../shared/widgets/taji_text_field.dart';
+import '../../auth/models/taji_user.dart';
 import '../../auth/state/auth_controller.dart';
 import '../data/visitor_authorization_repository.dart';
 import '../models/visitor_authorization.dart';
@@ -33,6 +36,11 @@ class _VisitorAuthorizationsScreenState
 
   bool get _isAdmin =>
       context.read<AuthController>().user?.role?.slug == 'administrador';
+
+  /// El backend solo permite emitir el QR a quien puede registrar la visita:
+  /// el residente dueño y la administración. Mostrar el botón al resto futile.
+  bool get _canIssueQr =>
+      context.read<AuthController>().user?.canIssueVisitQr ?? false;
 
   List<ResidentUnit> get _units {
     final residentUnits =
@@ -214,6 +222,10 @@ class _VisitorAuthorizationsScreenState
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
     }
   }
+
+  /// Abre la pantalla del QR temporal (T105 / CU09) de una autorización.
+  void _openQr(VisitorAuthorization item) =>
+      context.push(AppRoute.visitQrFor(item.id), extra: item);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -431,7 +443,9 @@ class _VisitorAuthorizationsScreenState
                   (item) => _AuthorizationCard(
                     item: item,
                     cancelling: _controller.cancellingId == item.id,
+                    canIssueQr: _canIssueQr,
                     onCancel: () => _cancel(item),
+                    onViewQr: () => _openQr(item),
                   ),
                 ),
             ],
@@ -506,12 +520,16 @@ class _AuthorizationCard extends StatelessWidget {
   const _AuthorizationCard({
     required this.item,
     required this.cancelling,
+    required this.canIssueQr,
     required this.onCancel,
+    required this.onViewQr,
   });
 
   final VisitorAuthorization item;
   final bool cancelling;
+  final bool canIssueQr;
   final VoidCallback onCancel;
+  final VoidCallback onViewQr;
 
   @override
   Widget build(BuildContext context) {
@@ -554,21 +572,32 @@ class _AuthorizationCard extends StatelessWidget {
               'Válida: ${_format(item.validFrom)} — ${_format(item.validUntil)}',
               style: const TextStyle(fontSize: 11),
             ),
-            if (!item.isCancelled)
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: cancelling ? null : onCancel,
-                  icon: cancelling
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.close, size: 16),
-                  label: const Text('Cancelar'),
-                ),
-              ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                if (canIssueQr) ...[
+                  TextButton.icon(
+                    onPressed: onViewQr,
+                    icon: const Icon(Icons.qr_code_2, size: 17),
+                    label: const Text('Ver QR'),
+                  ),
+                  const Spacer(),
+                ] else
+                  const Spacer(),
+                if (!item.isCancelled)
+                  TextButton.icon(
+                    onPressed: cancelling ? null : onCancel,
+                    icon: cancelling
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.close, size: 16),
+                    label: const Text('Cancelar'),
+                  ),
+              ],
+            ),
           ],
         ),
       ),

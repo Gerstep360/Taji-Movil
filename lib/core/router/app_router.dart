@@ -6,6 +6,9 @@ import '../../features/auth/screens/home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/visitors/models/visitor_authorization.dart';
+import '../../features/visitors/screens/visit_qr_scanner_screen.dart';
+import '../../features/visitors/screens/visit_qr_screen.dart';
 import '../../features/visitors/screens/visitor_authorizations_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
@@ -46,6 +49,35 @@ class AppRouter {
         name: AppRoute.visitorAuthorizations.name,
         builder: (_, __) => const VisitorAuthorizationsScreen(),
       ),
+      // T105 / CU09: QR temporal y vigencia de una autorización concreta.
+      GoRoute(
+        path: AppRoute.visitQr.path,
+        name: AppRoute.visitQr.name,
+        builder: (_, state) {
+          final id = int.tryParse(
+            state.pathParameters['authorizationId'] ?? '',
+          );
+          // `errorBuilder` cubre el caso, pero una pantalla con datos en blanco
+          // confunde más que un fallo explícito.
+          if (id == null || id <= 0) return const _RouteNotFoundScreen();
+          // La lista ya tiene visitante y unidad: se usan para pintar la
+          // cabecera al instante, sin esperar la respuesta del backend.
+          final seed = state.extra;
+          return VisitQrScreen(
+            authorizationId: id,
+            initialVisitorName: seed is VisitorAuthorization
+                ? seed.visitorName
+                : '',
+            initialUnit: seed is VisitorAuthorization ? seed.unit : '',
+          );
+        },
+      ),
+      // T106 / CU10: lector de QR del personal de seguridad.
+      GoRoute(
+        path: AppRoute.visitQrScanner.path,
+        name: AppRoute.visitQrScanner.name,
+        builder: (_, __) => const VisitQrScannerScreen(),
+      ),
       GoRoute(
         path: AppRoute.home.path,
         name: AppRoute.home.name,
@@ -71,12 +103,39 @@ class AppRouter {
           ? AppRoute.login.path
           : null;
     }
-    return {
-          AppRoute.home.path,
-          AppRoute.visitorAuthorizations.path,
-        }.contains(location)
-        ? null
-        : AppRoute.home.path;
+    return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
+  }
+
+  /// Rutas accesibles con sesión iniciada.
+  ///
+  /// Las que llevan parámetros se comparan por patrón: `matchedLocation` trae
+  /// la ruta ya resuelta (`/qr-visita/12`), no la plantilla declarada.
+  static const _authenticatedRoutes = [
+    AppRoute.home,
+    AppRoute.visitorAuthorizations,
+    AppRoute.visitQrScanner,
+    AppRoute.visitQr,
+  ];
+
+  static bool _isAuthenticatedRoute(String location) =>
+      _authenticatedRoutes.any((route) => _matchesRoute(route.path, location));
+
+  /// Compara una ruta con parámetros contra la ruta realmente visitada,
+  /// exigiendo igualdad en los segmentos literales.
+  static bool _matchesRoute(String pattern, String location) {
+    if (!pattern.contains(':')) return pattern == location;
+    final patternParts = pattern.split('/');
+    final locationParts = location.split('/');
+    if (patternParts.length != locationParts.length) return false;
+    for (var index = 0; index < patternParts.length; index++) {
+      final expected = patternParts[index];
+      if (expected.startsWith(':')) {
+        if (locationParts[index].isEmpty) return false;
+        continue;
+      }
+      if (expected != locationParts[index]) return false;
+    }
+    return true;
   }
 }
 

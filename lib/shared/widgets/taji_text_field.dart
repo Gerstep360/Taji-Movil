@@ -13,6 +13,8 @@ class TajiTextField extends StatefulWidget {
     this.autofillHints,
     this.validator,
     this.onFieldSubmitted,
+    this.maxLines = 1,
+    this.minLines,
   });
   final TextEditingController controller;
   final String label;
@@ -24,6 +26,10 @@ class TajiTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onFieldSubmitted;
+
+  /// Campos largos, como el código QR pegado a mano, necesitan varias líneas.
+  final int maxLines;
+  final int? minLines;
 
   @override
   State<TajiTextField> createState() => _TajiTextFieldState();
@@ -40,6 +46,8 @@ class _TajiTextFieldState extends State<TajiTextField> {
     autofillHints: widget.autofillHints,
     validator: widget.validator,
     onFieldSubmitted: widget.onFieldSubmitted,
+    maxLines: widget.maxLines,
+    minLines: widget.minLines,
     decoration: InputDecoration(
       labelText: widget.label,
       hintText: widget.hint,
