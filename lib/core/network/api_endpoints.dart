@@ -5,6 +5,10 @@ class ApiEndpoints {
 
   static const auth = _AuthEndpoints();
   static const security = _SecurityEndpoints();
+  static const visitorAuthorizations = _VisitorAuthorizationEndpoints();
+  static const visitQr = _VisitQrEndpoints();
+  static const units = _UnitEndpoints();
+  static const residents = _ResidentEndpoints();
 }
 
 class _SecurityEndpoints {
@@ -14,6 +18,46 @@ class _SecurityEndpoints {
   final String faceMatch = '/security/cu17/face-verification/match/';
   final String faceConfirm = '/security/cu17/face-verification/confirm/';
   final String faceLogs = '/security/cu17/face-verification/';
+}
+
+class _ResidentEndpoints {
+  const _ResidentEndpoints();
+
+  final String collection = '/residents/';
+}
+
+class _UnitEndpoints {
+  const _UnitEndpoints();
+
+  final String collection = '/units/';
+}
+
+class _VisitorAuthorizationEndpoints {
+  const _VisitorAuthorizationEndpoints();
+
+  final String collection = '/visit-authorizations/';
+  String cancel(int id) => '/visit-authorizations/$id/cancel/';
+}
+
+/// Rutas de CU09 (emisión y consulta del QR) y CU10 (validación en portería).
+///
+/// El backend monta CU10 antes que CU09 porque `visit-qr/validate/` es un
+/// segmento fijo y no debe competir con el patrón numérico `visit-qr/<pk>/`.
+class _VisitQrEndpoints {
+  const _VisitQrEndpoints();
+
+  /// Estado de vigencia del QR de una autorización. Nunca devuelve el token.
+  String detail(int authorizationId) => '/visit-qr/$authorizationId/';
+
+  /// Emite el QR con vigencia limitada. `force` rota uno todavía vigente.
+  String generate(int authorizationId) =>
+      '/visit-qr/$authorizationId/generate/';
+
+  /// Veredicto de un escaneo hecho por el personal de seguridad.
+  final String validate = '/visit-qr/validate/';
+
+  /// Catálogo de motivos de rechazo, para no codificar textos en la app.
+  final String validateReasons = '/visit-qr/validate/reasons/';
 }
 
 class _AuthEndpoints {

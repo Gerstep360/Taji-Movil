@@ -37,12 +37,21 @@ class AuthRepository {
         _api.tokens.save(session.tokens),
         _session.saveUser(session.user),
       ]);
-      return session.user;
+      try {
+        return await _loadCurrentUser();
+      } on DioException {
+        return session.user;
+      }
     } on DioException catch (error) {
       throw AuthException(
         ApiFailure.fromDio(error, fallback: 'Correo o contraseña incorrectos.'),
       );
     }
+  }
+
+  Future<TajiUser> _loadCurrentUser() async {
+    final json = await _api.get<Map<String, dynamic>>(ApiEndpoints.auth.me);
+    return TajiUser.fromJson(json!['user'] as Map<String, dynamic>);
   }
 
   Future<TajiUser?> restoreSession() async {
@@ -52,8 +61,7 @@ class AuthRepository {
     }
     final cachedUser = await _session.readUser();
     try {
-      final json = await _api.get<Map<String, dynamic>>(ApiEndpoints.auth.me);
-      final user = TajiUser.fromJson(json!['user'] as Map<String, dynamic>);
+      final user = await _loadCurrentUser();
       await _session.saveUser(user);
       return user;
     } on DioException catch (error) {

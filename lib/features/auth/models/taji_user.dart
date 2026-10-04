@@ -35,6 +35,7 @@ class TajiUser {
     required this.fullName,
     required this.phone,
     this.role,
+    this.residentUnits = const [],
   });
 
   final int id;
@@ -44,6 +45,7 @@ class TajiUser {
   final String fullName;
   final String phone;
   final TajiRole? role;
+  final List<Map<String, dynamic>> residentUnits;
 
   String get initials {
     final first = firstName.isEmpty ? '' : firstName[0];
@@ -61,6 +63,10 @@ class TajiUser {
     role: json['role'] is Map<String, dynamic>
         ? TajiRole.fromJson(json['role'] as Map<String, dynamic>)
         : null,
+    residentUnits: List<Map<String, dynamic>>.from(
+      (json['resident_units'] as List? ?? const [])
+          .whereType<Map<String, dynamic>>(),
+    ),
   );
 
   Map<String, dynamic> toJson() => {
@@ -71,5 +77,27 @@ class TajiUser {
     'full_name': fullName,
     'phone': phone,
     'role': role?.toJson(),
+    'resident_units': residentUnits,
   };
+}
+
+/// Comprobaciones de permisos para la interfaz.
+///
+/// El backend es la autoridad: `POST /visit-qr/validate/` exige el permiso
+/// `validate_visits` y que la ficha de personal esté activa. Estas extensiones
+/// solo evitan mostrar una acción que el servidor va a rechazar; nunca
+/// sustituyen la validación del servidor.
+extension TajiUserAccess on TajiUser {
+  bool hasPermission(String code) => role?.permissions.contains(code) ?? false;
+
+  /// Personal de seguridad y administración: puede escanear y validar QR en
+  /// portería. El rol `seguridad` y el `administrador` lo tienen; el resto no.
+  bool get canValidateVisits => hasPermission('validate_visits');
+
+  /// Residentes y administración: pueden emitir el QR de sus visitas. El rol
+  /// `seguridad` queda excluido a propósito, igual que en el backend.
+  bool get canIssueVisitQr =>
+      hasPermission('register_visits') || hasPermission('manage_visits');
+
+  bool get isAdmin => role?.slug == 'administrador';
 }

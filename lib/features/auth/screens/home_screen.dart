@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'package:go_router/go_router.dart';
 
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
 import '../../../shared/widgets/taji_logo.dart';
+import '../models/taji_user.dart';
 import '../state/auth_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -189,6 +189,29 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
+            // T106 / CU10: el lector solo se ofrece a quien el backend autoriza
+            // a validar, es decir, quien tiene el permiso `validate_visits`
+            // (personal de seguridad y administración).
+            if (user.canValidateVisits) ...[
+              FilledButton.icon(
+                onPressed: () => context.push(AppRoute.visitQrScanner.path),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
+                icon: const Icon(Icons.qr_code_scanner),
+                label: const Text('Escanear QR de visita'),
+              ),
+              const SizedBox(height: 10),
+            ],
+            FilledButton.icon(
+              onPressed: () => context.go(AppRoute.visitorAuthorizations.path),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+              ),
+              icon: const Icon(Icons.event_available_outlined),
+              label: const Text('Autorizar una visita'),
+            ),
+            const SizedBox(height: 10),
             OutlinedButton.icon(
               onPressed: auth.busy ? null : auth.logout,
               style: OutlinedButton.styleFrom(
@@ -389,7 +412,7 @@ class _ActionCard extends StatelessWidget {
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
-                  crossAxisAlignment: CrossAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
@@ -413,4 +436,3 @@ class _ActionCard extends StatelessWidget {
         ),
       );
 }
-

@@ -24,6 +24,9 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- CU10 / RF-10 (T106): permiso de cámara para el lector de QR de portería. -->
+	<key>NSCameraUsageDescription</key>
+	<string>Taji usa la cámara para escanear el código QR temporal de una visita y verificar su vigencia antes de permitir el ingreso.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
