@@ -394,3 +394,65 @@ class FaceVerificationModel {
     'verified_at': verifiedAt.toIso8601String(),
   };
 }
+
+class FaceMatchCandidateModel {
+  const FaceMatchCandidateModel({
+    required this.id,
+    required this.fullName,
+    required this.documentNumber,
+    required this.documentType,
+    required this.phone,
+    required this.status,
+  });
+
+  final int id;
+  final String fullName;
+  final String documentNumber;
+  final String documentType;
+  final String phone;
+  final String status;
+
+  factory FaceMatchCandidateModel.fromJson(Map<String, dynamic> json) =>
+      FaceMatchCandidateModel(
+        id: readInt(json['id']),
+        fullName: readString(json['full_name']),
+        documentNumber: readString(json['document_number']),
+        documentType: readString(json['document_type']),
+        phone: readString(json['phone']),
+        status: readString(json['status']),
+      );
+}
+
+class FaceMatchResultModel {
+  const FaceMatchResultModel({
+    required this.matchedResident,
+    required this.biometricReferenceId,
+    required this.similarityScore,
+    required this.threshold,
+    required this.result,
+    required this.modelName,
+    required this.modelVersion,
+  });
+
+  final FaceMatchCandidateModel? matchedResident;
+  final int? biometricReferenceId;
+  final double similarityScore;
+  final double threshold;
+  final String result;
+  final String modelName;
+  final String modelVersion;
+
+  factory FaceMatchResultModel.fromJson(Map<String, dynamic> json) =>
+      FaceMatchResultModel(
+        matchedResident: json['matched_resident'] != null
+            ? FaceMatchCandidateModel.fromJson(json['matched_resident'])
+            : null,
+        biometricReferenceId: readNullableInt(json['biometric_reference_id']),
+        similarityScore: (json['similarity_score'] as num?)?.toDouble() ?? 0.0,
+        threshold: (json['threshold'] as num?)?.toDouble() ?? 0.70,
+        result: readString(json['result']),
+        modelName: readString(json['model_name']),
+        modelVersion: readString(json['model_version']),
+      );
+}
+

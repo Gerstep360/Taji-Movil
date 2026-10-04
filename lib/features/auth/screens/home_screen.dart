@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:go_router/go_router.dart';
+
+import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
 import '../../../shared/widgets/taji_logo.dart';
 import '../state/auth_controller.dart';
@@ -116,6 +119,15 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 14),
+            _ActionCard(
+              icon: Icons.face_retouching_natural,
+              iconColor: const Color(0xFF4F46E5),
+              iconBackground: const Color(0xFFEEF2FF),
+              title: 'Verificación Facial (CU17)',
+              subtitle: 'Escaneo fotográfico y confirmación humana (RF-17)',
+              onTap: () => context.push(AppRoute.faceVerification.path),
+            ),
+            const SizedBox(height: 10),
             _InfoCard(
               icon: Icons.badge_outlined,
               iconColor: TajiColors.primary,
@@ -327,3 +339,78 @@ class _DataRow extends StatelessWidget {
     ),
   );
 }
+
+class _ActionCard extends StatelessWidget {
+  const _ActionCard({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBackground,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBackground;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFFC7D2FE), width: 1.5),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0F4F46E5),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: iconBackground,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: iconColor, size: 24),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: TajiColors.ink,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(color: TajiColors.muted, fontSize: 11),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 14, color: TajiColors.muted),
+            ],
+          ),
+        ),
+      );
+}
+

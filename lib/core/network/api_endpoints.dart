@@ -4,6 +4,16 @@ class ApiEndpoints {
   static const health = '/health/';
 
   static const auth = _AuthEndpoints();
+  static const security = _SecurityEndpoints();
+}
+
+class _SecurityEndpoints {
+  const _SecurityEndpoints();
+
+  final String biometricsEnroll = '/security/cu17/biometrics/enroll/';
+  final String faceMatch = '/security/cu17/face-verification/match/';
+  final String faceConfirm = '/security/cu17/face-verification/confirm/';
+  final String faceLogs = '/security/cu17/face-verification/';
 }
 
 class _AuthEndpoints {

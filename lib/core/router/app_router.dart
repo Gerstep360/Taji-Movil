@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
-import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/security/screens/face_verification_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
 
@@ -45,6 +45,11 @@ class AppRouter {
         name: AppRoute.home.name,
         builder: (_, __) => const HomeScreen(),
       ),
+      GoRoute(
+        path: AppRoute.faceVerification.path,
+        name: AppRoute.faceVerification.name,
+        builder: (_, __) => const FaceVerificationScreen(),
+      ),
     ],
   );
 
@@ -65,7 +70,10 @@ class AppRouter {
           ? AppRoute.login.path
           : null;
     }
-    return location == AppRoute.home.path ? null : AppRoute.home.path;
+    if (isGuestRoute || location == AppRoute.splash.path) {
+      return AppRoute.home.path;
+    }
+    return null;
   }
 }
 
