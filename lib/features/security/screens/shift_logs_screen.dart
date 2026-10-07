@@ -270,7 +270,7 @@ class _LogFormState extends State<_LogForm> {
                 ],
                 DropdownButtonFormField<String>(
                   key: const Key('log-type'),
-                  initialValue: type,
+                  value: type,
                   decoration: const InputDecoration(labelText: 'Tipo'),
                   items: ShiftLogEntryModel.types.entries
                       .map(
@@ -287,7 +287,7 @@ class _LogFormState extends State<_LogForm> {
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   key: const Key('log-severity'),
-                  initialValue: severity,
+                  value: severity,
                   decoration: const InputDecoration(labelText: 'Prioridad'),
                   items: ShiftLogEntryModel.severities.entries
                       .map(

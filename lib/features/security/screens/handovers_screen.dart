@@ -252,7 +252,7 @@ class _DeliveryFormState extends State<_DeliveryForm> {
                 if (controller.candidates.isNotEmpty)
                   DropdownButtonFormField<int>(
                     key: const Key('relay-shift'),
-                    initialValue: incoming,
+                    value: incoming,
                     isExpanded: true,
                     itemHeight: null,
                     decoration: const InputDecoration(
