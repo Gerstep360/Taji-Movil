@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-<<<<<<< HEAD
-=======
-import '../../../core/router/app_routes.dart';
-import '../models/taji_user.dart';
->>>>>>> origin/Cristel
+import 'package:provider/provider.dart';
 
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
 import '../../../shared/widgets/taji_drawer.dart';
 import '../../../shared/widgets/taji_logo.dart';
+import '../models/taji_user.dart';
 import '../state/auth_controller.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -183,7 +179,6 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
 
             // QUICK ACTIONS TITLE
@@ -211,7 +206,35 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ACTION CARDS
+            if (user.canUseSecurityShifts) ...[
+              _ActionCard(
+                icon: Icons.schedule,
+                iconColor: TajiColors.primary,
+                iconBackground: TajiColors.primarySoft,
+                title: 'Mis turnos de seguridad',
+                subtitle: 'Turno actual, próximos turnos e historial',
+                onTap: () => context.push(AppRoute.securityShifts.path),
+              ),
+              const SizedBox(height: 10),
+              _ActionCard(
+                icon: Icons.edit_note,
+                iconColor: TajiColors.primary,
+                iconBackground: TajiColors.primarySoft,
+                title: 'Novedades de turno',
+                subtitle: 'Registrar novedades, incidentes y alertas',
+                onTap: () => context.push(AppRoute.shiftLogs.path),
+              ),
+              const SizedBox(height: 10),
+              _ActionCard(
+                icon: Icons.swap_horiz,
+                iconColor: TajiColors.primary,
+                iconBackground: TajiColors.primarySoft,
+                title: 'Entrega y recepción',
+                subtitle: 'Resumen y confirmación del relevo',
+                onTap: () => context.push(AppRoute.handovers.path),
+              ),
+              const SizedBox(height: 10),
+            ],
             _ActionCard(
               icon: Icons.qr_code_2_rounded,
               iconColor: const Color(0xFF0F6FFF),

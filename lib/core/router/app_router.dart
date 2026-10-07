@@ -6,6 +6,10 @@ import '../../features/auth/screens/home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/auth/models/taji_user.dart';
+import '../../features/security/screens/security_shifts_screen.dart';
+import '../../features/security/screens/shift_logs_screen.dart';
+import '../../features/security/screens/handovers_screen.dart';
 import '../../features/security/screens/face_verification_screen.dart';
 import '../../features/visitors/models/visitor_authorization.dart';
 import '../../features/visitors/screens/visit_consultation_screen.dart';
@@ -87,6 +91,21 @@ class AppRouter {
         builder: (_, __) => const HomeScreen(),
       ),
       GoRoute(
+        path: AppRoute.securityShifts.path,
+        name: AppRoute.securityShifts.name,
+        builder: (_, __) => const SecurityShiftsScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.shiftLogs.path,
+        name: AppRoute.shiftLogs.name,
+        builder: (_, __) => const ShiftLogsScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.handovers.path,
+        name: AppRoute.handovers.name,
+        builder: (_, __) => const HandoversScreen(),
+      ),
+      GoRoute(
         path: AppRoute.faceVerification.path,
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
@@ -111,12 +130,23 @@ class AppRouter {
           ? AppRoute.login.path
           : null;
     }
+    if ([
+          AppRoute.securityShifts.path,
+          AppRoute.shiftLogs.path,
+          AppRoute.handovers.path,
+        ].contains(location) &&
+        auth.user?.canUseSecurityShifts != true) {
+      return AppRoute.home.path;
+    }
     return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
   }
 
   /// Rutas accesibles con sesión iniciada.
   static const _authenticatedRoutes = [
     AppRoute.home,
+    AppRoute.securityShifts,
+    AppRoute.shiftLogs,
+    AppRoute.handovers,
     AppRoute.faceVerification,
     AppRoute.visitorAuthorizations,
     AppRoute.visitQrScanner,

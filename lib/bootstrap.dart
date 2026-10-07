@@ -12,6 +12,9 @@ import 'core/router/app_router.dart';
 import 'core/theme/taji_theme.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/state/auth_controller.dart';
+import 'features/security/data/security_shift_repository.dart';
+import 'features/security/data/shift_log_repository.dart';
+import 'features/security/data/handover_repository.dart';
 import 'features/visitors/data/visit_qr_repository.dart';
 import 'features/visitors/data/visitor_authorization_repository.dart';
 import 'shared/widgets/taji_logo.dart';
@@ -45,6 +48,11 @@ Future<void> bootstrap() async {
     MultiProvider(
       providers: [
         Provider<ApiClient>.value(value: api),
+        Provider<HandoverDataSource>(create: (_) => HandoverRepository(api)),
+        Provider<ShiftLogDataSource>(create: (_) => ShiftLogRepository(api)),
+        Provider<SecurityShiftDataSource>(
+          create: (_) => SecurityShiftRepository(api),
+        ),
         Provider<AuthRepository>.value(value: repository),
         Provider<VisitorAuthorizationRepository>.value(
           value: visitorRepository,
