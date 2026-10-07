@@ -213,13 +213,6 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         icon: Icons.description_outlined,
                         isAvailable: false,
                       ),
-                      _DrawerSubItem(
-                        label: 'Verificación Facial',
-                        icon: Icons.face_retouching_natural_rounded,
-                        route: AppRoute.faceVerification.path,
-                        isActive: currentLocation == AppRoute.faceVerification.path,
-                        isAvailable: true,
-                      ),
                     ],
                   ),
 
@@ -229,22 +222,29 @@ class _TajiDrawerState extends State<TajiDrawer> {
                   _PackageAccordion(
                     id: 'paquete3',
                     title: 'Incidencias e IA',
-                    icon: Icons.warning_amber_rounded,
+                    icon: Icons.auto_awesome_rounded,
                     isExpanded: _isExpanded('paquete3'),
                     onToggle: () => _togglePackage('paquete3'),
-                    activeCount: 0,
-                    items: const [
+                    activeCount: 1,
+                    items: [
                       _DrawerSubItem(
+                        label: 'Reconocimiento Facial',
+                        icon: Icons.face_retouching_natural_rounded,
+                        route: AppRoute.faceVerification.path,
+                        isActive: currentLocation == AppRoute.faceVerification.path,
+                        isAvailable: true,
+                      ),
+                      const _DrawerSubItem(
                         label: 'Reportar Incidencia',
                         icon: Icons.report_problem_outlined,
                         isAvailable: false,
                       ),
-                      _DrawerSubItem(
+                      const _DrawerSubItem(
                         label: 'Seguimiento y Ciclo',
                         icon: Icons.alt_route_rounded,
                         isAvailable: false,
                       ),
-                      _DrawerSubItem(
+                      const _DrawerSubItem(
                         label: 'Clasificación con IA',
                         icon: Icons.auto_awesome_outlined,
                         isAvailable: false,
@@ -330,73 +330,107 @@ class _TajiDrawerState extends State<TajiDrawer> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ACTIVE TENANT PILL (Multi-Tenant SaaS)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                  // ACTIVE TENANT PILL (Multi-Tenant SaaS Premium)
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _showCondominiumInfo(context, user),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: const Color(0xFFCBD5E1)),
-                          ),
-                          child: const Icon(
-                            Icons.apartment_rounded,
-                            color: Color(0xFF0F6FFF),
-                            size: 15,
-                          ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'CONDOMINIO',
-                                style: TextStyle(
-                                  color: Color(0xFF64748B),
-                                  fontSize: 8.5,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.6,
-                                ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xFFCBD5E1)),
                               ),
-                              Text(
-                                user?.activeTenant?.name ?? 'Condominio Taji',
-                                style: const TextStyle(
-                                  color: Color(0xFF10233C),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (user?.activeTenant?.slug != null && user!.activeTenant!.slug.isNotEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE2E8F0),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              user.activeTenant!.slug,
-                              style: const TextStyle(
-                                color: Color(0xFF334155),
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'monospace',
+                              child: const Icon(
+                                Icons.apartment_rounded,
+                                color: Color(0xFF0F6FFF),
+                                size: 15,
                               ),
                             ),
-                          ),
-                      ],
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'CONDOMINIO',
+                                    style: TextStyle(
+                                      color: Color(0xFF64748B),
+                                      fontSize: 8.5,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.6,
+                                    ),
+                                  ),
+                                  Text(
+                                    user?.activeTenant?.name ?? 'Condominio Taji',
+                                    style: const TextStyle(
+                                      color: Color(0xFF10233C),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [Color(0xFF2563EB), Color(0xFF0F6FFF)],
+                                    ),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Text(
+                                    'SaaS PRO',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 7.5,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                ),
+                                if (user?.activeTenant?.slug != null && user!.activeTenant!.slug.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE2E8F0),
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                    child: Text(
+                                      user.activeTenant!.slug,
+                                      style: const TextStyle(
+                                        color: Color(0xFF334155),
+                                        fontSize: 8.5,
+                                        fontWeight: FontWeight.w700,
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
 
@@ -467,7 +501,7 @@ class _TajiDrawerState extends State<TajiDrawer> {
   }
 
   int _countAvailableSecurity(TajiUser? user) {
-    int count = 4; // Visitantes, Pases QR, Personas dentro, Verificación facial
+    int count = 3; // Visitantes, Pases QR, Personas dentro (Verificación Facial se movió a Paquete 3)
     if (user?.canValidateVisits ?? false) count++;
     if (user?.canUseSecurityShifts ?? false) count += 3;
     return count;
@@ -477,77 +511,146 @@ class _TajiDrawerState extends State<TajiDrawer> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         title: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.apartment_rounded, color: Color(0xFF0F6FFF), size: 20),
-            ),
-            const SizedBox(width: 10),
-            const Text('Mi Condominio & SaaS', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Instancia SaaS Multi-Tenant Activa:',
-              style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              user?.activeTenant?.name ?? 'Condominio Taji',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFF10233C)),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2563EB), Color(0xFF0F6FFF)],
+                ),
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
+              child: const Icon(Icons.cloud_done_rounded, color: Colors.white, size: 22),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Identificador / Slug:', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                      Text(
-                        user?.activeTenant?.slug ?? 'taji',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, fontFamily: 'monospace'),
-                      ),
-                    ],
+                  Text(
+                    'Instancia SaaS Multi-Tenant',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF10233C)),
                   ),
-                  const Divider(height: 16, color: Color(0xFFE2E8F0)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Tu Rol:', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                      Text(
-                        user?.role?.name ?? 'Residente',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF075AD7)),
-                      ),
-                    ],
+                  Text(
+                    'Plataforma Cloud Taji Enterprise',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
             ),
           ],
         ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFF8FAFC), Color(0xFFEFF6FF)],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFBFDBFE)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          user?.activeTenant?.name ?? 'Condominio Taji',
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF10233C)),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF2563EB), Color(0xFF0F6FFF)],
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Text(
+                          'PLAN PRO',
+                          style: TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.fingerprint_rounded, size: 13, color: Color(0xFF64748B)),
+                      const SizedBox(width: 4),
+                      const Text('Tenant ID: ', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                      Text(
+                        user?.activeTenant?.slug ?? 'taji-default',
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, fontFamily: 'monospace', color: Color(0xFF1E293B)),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'GARANTÍAS DE NIVEL EMPRESARIAL',
+              style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Color(0xFF64748B), letterSpacing: 0.5),
+            ),
+            const SizedBox(height: 8),
+            _saasFeatureRow(Icons.lock_outline_rounded, 'Aislamiento Estricto', 'Base de datos particionada por condominio'),
+            const SizedBox(height: 6),
+            _saasFeatureRow(Icons.face_retouching_natural_rounded, 'IA Biométrica Facial', 'Algoritmo InsightFace 512-D en portería'),
+            const SizedBox(height: 6),
+            _saasFeatureRow(Icons.speed_rounded, 'Alta Disponibilidad', 'SLA 99.9% y sincronización en tiempo real'),
+            const SizedBox(height: 6),
+            _saasFeatureRow(Icons.credit_card_rounded, 'Pagos Integrados', 'Suscripciones y expensas BOB / USD con Stripe'),
+          ],
+        ),
         actions: [
-          TextButton(
+          FilledButton(
             onPressed: () => Navigator.pop(ctx),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF0F6FFF),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
             child: const Text('Entendido', style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ],
       ),
+    );
+  }
+
+  static Widget _saasFeatureRow(IconData icon, String title, String subtitle) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 15, color: const Color(0xFF0F6FFF)),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF10233C)),
+              ),
+              Text(
+                subtitle,
+                style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
