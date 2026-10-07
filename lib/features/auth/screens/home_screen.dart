@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/router/app_routes.dart';
+import '../models/taji_user.dart';
 
 import '../../../core/theme/taji_theme.dart';
 import '../../../shared/widgets/taji_logo.dart';
@@ -53,6 +56,15 @@ class HomeScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 20),
+            if (['manage_visits', 'register_visits', 'validate_visits', 'register_entry_exit'].any(user.hasPermission))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: OutlinedButton.icon(
+                  onPressed: () => context.push(AppRoute.visitConsultation.path),
+                  icon: const Icon(Icons.people_outline),
+                  label: const Text('Consultar visitas y personas dentro'),
+                ),
+              ),
             Container(
               padding: const EdgeInsets.all(23),
               decoration: BoxDecoration(

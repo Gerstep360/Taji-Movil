@@ -6,6 +6,7 @@ import '../../features/auth/screens/home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/visitors/screens/visit_consultation_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
 
@@ -18,6 +19,11 @@ class AppRouter {
     redirect: (_, state) => _redirect(auth, state),
     errorBuilder: (_, __) => const _RouteNotFoundScreen(),
     routes: [
+      GoRoute(
+        path: AppRoute.visitConsultation.path,
+        name: AppRoute.visitConsultation.name,
+        builder: (_, __) => const VisitConsultationScreen(),
+      ),
       GoRoute(
         path: AppRoute.splash.path,
         name: AppRoute.splash.name,
@@ -74,6 +80,7 @@ class AppRouter {
   /// la ruta ya resuelta (`/qr-visita/12`), no la plantilla declarada.
   static const _authenticatedRoutes = [
     AppRoute.home,
+    AppRoute.visitConsultation,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>
