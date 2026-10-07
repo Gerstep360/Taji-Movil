@@ -73,3 +73,7 @@ class TajiUser {
     'role': role?.toJson(),
   };
 }
+
+extension TajiUserAccess on TajiUser {
+  bool hasPermission(String code) => role?.permissions.contains(code) ?? false;
+}

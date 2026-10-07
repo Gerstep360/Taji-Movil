@@ -65,7 +65,36 @@ class AppRouter {
           ? AppRoute.login.path
           : null;
     }
-    return location == AppRoute.home.path ? null : AppRoute.home.path;
+    return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
+  }
+
+  /// Rutas accesibles con sesión iniciada.
+  ///
+  /// Las que llevan parámetros se comparan por patrón: `matchedLocation` trae
+  /// la ruta ya resuelta (`/qr-visita/12`), no la plantilla declarada.
+  static const _authenticatedRoutes = [
+    AppRoute.home,
+  ];
+
+  static bool _isAuthenticatedRoute(String location) =>
+      _authenticatedRoutes.any((route) => _matchesRoute(route.path, location));
+
+  /// Compara una ruta con parámetros contra la ruta realmente visitada,
+  /// exigiendo igualdad en los segmentos literales.
+  static bool _matchesRoute(String pattern, String location) {
+    if (!pattern.contains(':')) return pattern == location;
+    final patternParts = pattern.split('/');
+    final locationParts = location.split('/');
+    if (patternParts.length != locationParts.length) return false;
+    for (var index = 0; index < patternParts.length; index++) {
+      final expected = patternParts[index];
+      if (expected.startsWith(':')) {
+        if (locationParts[index].isEmpty) return false;
+        continue;
+      }
+      if (expected != locationParts[index]) return false;
+    }
+    return true;
   }
 }
 
