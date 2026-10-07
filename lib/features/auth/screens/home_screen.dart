@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+<<<<<<< HEAD
+=======
+import '../../../core/router/app_routes.dart';
+import '../models/taji_user.dart';
+>>>>>>> origin/Cristel
 
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
@@ -107,8 +112,15 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-
-            // WELCOME HERO CARD
+            if (['manage_visits', 'register_visits', 'validate_visits', 'register_entry_exit'].any(user.hasPermission))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: OutlinedButton.icon(
+                  onPressed: () => context.push(AppRoute.visitConsultation.path),
+                  icon: const Icon(Icons.people_outline),
+                  label: const Text('Consultar visitas y personas dentro'),
+                ),
+              ),
             Container(
               padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(

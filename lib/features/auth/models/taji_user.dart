@@ -115,6 +115,7 @@ class TajiUser {
   };
 }
 
+<<<<<<< HEAD
 /// Comprobaciones de permisos para la interfaz.
 ///
 /// El backend es la autoridad: `POST /visit-qr/validate/` exige el permiso

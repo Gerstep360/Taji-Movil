@@ -2,6 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   static const health = '/health/';
+  static const visitConsultation = '/security/cu12/visits/';
 
   static const auth = _AuthEndpoints();
   static const security = _SecurityEndpoints();

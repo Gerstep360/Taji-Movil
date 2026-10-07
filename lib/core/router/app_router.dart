@@ -8,6 +8,7 @@ import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
 import '../../features/security/screens/face_verification_screen.dart';
 import '../../features/visitors/models/visitor_authorization.dart';
+import '../../features/visitors/screens/visit_consultation_screen.dart';
 import '../../features/visitors/screens/visit_qr_scanner_screen.dart';
 import '../../features/visitors/screens/visit_qr_screen.dart';
 import '../../features/visitors/screens/visitor_authorizations_screen.dart';
@@ -23,6 +24,11 @@ class AppRouter {
     redirect: (_, state) => _redirect(auth, state),
     errorBuilder: (_, __) => const _RouteNotFoundScreen(),
     routes: [
+      GoRoute(
+        path: AppRoute.visitConsultation.path,
+        name: AppRoute.visitConsultation.name,
+        builder: (_, __) => const VisitConsultationScreen(),
+      ),
       GoRoute(
         path: AppRoute.splash.path,
         name: AppRoute.splash.name,
@@ -115,6 +121,7 @@ class AppRouter {
     AppRoute.visitorAuthorizations,
     AppRoute.visitQrScanner,
     AppRoute.visitQr,
+    AppRoute.visitConsultation,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>

@@ -7,7 +7,8 @@ enum AppRoute {
   faceVerification('/verificacion-facial'),
   visitorAuthorizations('/autorizaciones-visita'),
   visitQr('/qr-visita/:authorizationId'),
-  visitQrScanner('/escanear-qr');
+  visitQrScanner('/escanear-qr'),
+  visitConsultation('/visitas-dentro');
 
   const AppRoute(this.path);
   final String path;
