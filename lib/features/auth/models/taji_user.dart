@@ -135,8 +135,7 @@ extension TajiUserAccess on TajiUser {
       isAdmin ||
       hasPermission('register_visits') ||
       hasPermission('manage_visits') ||
-      role?.slug == 'residente' ||
-      role == null;
+      role?.slug == 'residente';
 
   bool get isAdmin => role?.slug == 'administrador' || role?.slug == 'superadmin';
 }
