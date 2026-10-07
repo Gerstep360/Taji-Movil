@@ -56,6 +56,10 @@ class ApiClient {
     if (access?.isNotEmpty == true) {
       options.headers['Authorization'] = 'Bearer $access';
     }
+    final tenantId = await tokens.tenantId;
+    if (tenantId?.isNotEmpty == true) {
+      options.headers['X-Tenant-ID'] = tenantId;
+    }
     handler.next(options);
   }
 

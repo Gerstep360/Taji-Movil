@@ -10,6 +10,11 @@ class TajiColors {
   static const canvas = Color(0xFFF4F7FB);
   static const success = Color(0xFF16855E);
   static const danger = Color(0xFFB43C49);
+  // Estados intermedios: la vigencia de un QR o de un turno que se agota.
+  static const warning = Color(0xFFB26A00);
+  static const warningSoft = Color(0xFFFFF6E6);
+  static const successSoft = Color(0xFFEAFBF3);
+  static const dangerSoft = Color(0xFFFFF1F2);
 }
 
 ThemeData buildTajiTheme() {

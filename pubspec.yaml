@@ -38,6 +38,12 @@ dependencies:
   flutter_secure_storage: ^10.3.1
   provider: ^6.1.5+1
   go_router: ^17.0.0
+  # CU09 / RF-09 (T105): render del QR temporal de visita.
+  qr_flutter: ^4.1.0
+  # CU10 / RF-10 (T106): lector de QR en portería.
+  mobile_scanner: ^7.1.3
+  permission_handler: ^13.0.2
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:

@@ -17,6 +17,7 @@ app.*.symbols
 app.*.map.json
 
 # Artefactos de Android Studio / Gradle
+/android/build/
 /android/app/debug
 /android/app/profile
 /android/app/release

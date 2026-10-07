@@ -23,8 +23,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phone = TextEditingController();
   final _password = TextEditingController();
   final _confirm = TextEditingController();
+  final _unitLabel = TextEditingController();
+  List<Map<String, dynamic>> _condominiums = [];
+  int? _selectedCondominiumId;
   bool _busy = false;
   String _error = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCondos();
+  }
+
+  Future<void> _loadCondos() async {
+    final list = await context.read<AuthRepository>().getPublicCondominiums();
+    if (mounted) {
+      setState(() {
+        _condominiums = list;
+        if (list.isNotEmpty && _selectedCondominiumId == null) {
+          _selectedCondominiumId = list.first['id'] as int?;
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -35,6 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _phone,
       _password,
       _confirm,
+      _unitLabel,
     ]) {
       controller.dispose();
     }
@@ -44,6 +66,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedCondominiumId == null) {
+      setState(() => _error = 'Por favor selecciona tu condominio de residencia.');
+      return;
+    }
     setState(() {
       _busy = true;
       _error = '';
@@ -55,6 +81,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: _email.text,
         phone: _phone.text,
         password: _password.text,
+        condominiumId: _selectedCondominiumId,
+        unitLabel: _unitLabel.text,
       );
       if (!mounted) return;
       context.goNamed(
@@ -81,6 +109,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
         children: [
           StatusBanner(message: _error),
           if (_error.isNotEmpty) const SizedBox(height: 15),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFDCE4ED)),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: _selectedCondominiumId,
+                isExpanded: true,
+                hint: const Text(
+                  'Selecciona tu Condominio',
+                  style: TextStyle(color: Color(0xFF6F7F93), fontSize: 14),
+                ),
+                icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF0F6FFF)),
+                items: _condominiums.map((c) {
+                  return DropdownMenuItem<int>(
+                    value: c['id'] as int?,
+                    child: Text(
+                      '${c['name']} (${c['address'] ?? c['slug']})',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF10233C),
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (val) => setState(() => _selectedCondominiumId = val),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          TajiTextField(
+            controller: _unitLabel,
+            label: 'Unidad / Departamento que habitas',
+            hint: 'Ej. Torre A - Depto 302',
+            icon: Icons.apartment_outlined,
+            textInputAction: TextInputAction.next,
+            validator: _required,
+          ),
+          const SizedBox(height: 15),
           _ResponsivePair(
             children: [
               TajiTextField(
