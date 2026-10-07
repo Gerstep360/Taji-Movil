@@ -130,6 +130,13 @@ class SecurityShiftModel {
     required this.openingNotes,
     required this.closingNotes,
     required this.createdAt,
+    this.guardName = '',
+    this.guardEmployeeCode = '',
+    this.condominiumName = '',
+    this.observation = '',
+    this.serverTime,
+    this.allowedStartAt,
+    this.otherOpenShiftId,
   });
 
   final int id;
@@ -142,11 +149,62 @@ class SecurityShiftModel {
   final String openingNotes;
   final String closingNotes;
   final DateTime createdAt;
+  final String guardName;
+  final String guardEmployeeCode;
+  final String condominiumName;
+  final String observation;
+  final DateTime? serverTime;
+  final DateTime? allowedStartAt;
+  final int? otherOpenShiftId;
+
+  DateTime get startAllowedAt =>
+      allowedStartAt ?? scheduledStart.subtract(const Duration(minutes: 15));
+
+  String get statusLabel => switch (status) {
+    'SCHEDULED' => 'Programado',
+    'OPEN' => 'En curso',
+    'CLOSED' => 'Finalizado',
+    'CANCELLED' => 'Cancelado',
+    _ => status,
+  };
+
+  String startBlockReason(DateTime now) {
+    if (status != 'SCHEDULED') {
+      return 'Solo puedes iniciar un turno programado.';
+    }
+    if (!now.isBefore(scheduledEnd)) {
+      return 'El horario finalizó: turno sin iniciar.';
+    }
+    if (now.isBefore(startAllowedAt)) {
+      return 'El inicio se habilita 15 minutos antes del horario programado.';
+    }
+    if (otherOpenShiftId != null) {
+      return 'Debes cerrar tu otro turno abierto antes de iniciar este.';
+    }
+    return '';
+  }
+
+  bool closeReasonRequired(DateTime now) =>
+      status == 'OPEN' && !now.isAtSameMomentAs(scheduledEnd);
+
+  String timingNotice(DateTime now) {
+    if (status == 'SCHEDULED' && !now.isBefore(scheduledEnd)) {
+      return 'Sin iniciar: el horario ya finalizó.';
+    }
+    if (status == 'OPEN' && !now.isBefore(scheduledEnd)) {
+      return 'Horario finalizado, cierre pendiente.';
+    }
+    if (status == 'CLOSED' && closedAt != null) {
+      if (closedAt!.isBefore(scheduledEnd)) return 'Cierre anticipado';
+      if (closedAt!.isAfter(scheduledEnd)) return 'Cierre posterior al horario';
+    }
+    return '';
+  }
 
   factory SecurityShiftModel.fromJson(Map<String, dynamic> json) =>
       SecurityShiftModel(
         id: readInt(json['id']),
-        guardStaffId: readInt(json['guard_staff_id']),
+        guardStaffId: readInt(json['guard_staff'] ?? json['guard_staff_id']),
         scheduledStart: readDateTime(json['scheduled_start']),
         scheduledEnd: readDateTime(json['scheduled_end']),
         openedAt: readNullableDateTime(json['opened_at']),
@@ -155,11 +213,25 @@ class SecurityShiftModel {
         openingNotes: readString(json['opening_notes']),
         closingNotes: readString(json['closing_notes']),
         createdAt: readDateTime(json['created_at']),
+        guardName: readString(json['guard_name']),
+        guardEmployeeCode: readString(json['guard_employee_code']),
+        condominiumName: readString(json['condominium_name']),
+        observation: readString(json['observation']),
+        serverTime: readNullableDateTime(
+          (json['timing'] as Map?)?['server_time'],
+        ),
+        allowedStartAt: readNullableDateTime(
+          (json['timing'] as Map?)?['start_allowed_at'],
+        ),
+        otherOpenShiftId: readNullableInt(
+          (json['timing'] as Map?)?['other_open_shift_id'],
+        ),
       );
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'guard_staff_id': guardStaffId,
+    'guard_staff': guardStaffId,
     'scheduled_start': scheduledStart.toIso8601String(),
     'scheduled_end': scheduledEnd.toIso8601String(),
     'opened_at': openedAt?.toIso8601String(),
@@ -168,6 +240,15 @@ class SecurityShiftModel {
     'opening_notes': openingNotes,
     'closing_notes': closingNotes,
     'created_at': createdAt.toIso8601String(),
+    'guard_name': guardName,
+    'guard_employee_code': guardEmployeeCode,
+    'condominium_name': condominiumName,
+    'observation': observation,
+    'timing': {
+      'server_time': serverTime?.toIso8601String(),
+      'start_allowed_at': startAllowedAt.toIso8601String(),
+      'other_open_shift_id': otherOpenShiftId,
+    },
   };
 }
 
@@ -183,12 +264,16 @@ class ShiftLogEntryModel {
     required this.description,
     required this.occurredAt,
     required this.createdAt,
+    this.guardName = '',
+    this.condominiumName = '',
   });
 
   final int id;
   final int shiftId;
   final int? createdByUserId;
   final int? sectorId;
+  final String guardName;
+  final String condominiumName;
   final String entryType;
   final String severity;
   final String title;
@@ -196,11 +281,28 @@ class ShiftLogEntryModel {
   final DateTime occurredAt;
   final DateTime createdAt;
 
+  static const types = {
+    'NOTE': 'Novedad',
+    'INCIDENT': 'Incidente',
+    'ALERT': 'Alerta',
+  };
+  static const severities = {
+    'INFO': 'Información',
+    'LOW': 'Baja',
+    'MEDIUM': 'Media',
+    'HIGH': 'Alta',
+    'CRITICAL': 'Crítica',
+  };
+  String get typeLabel => types[entryType] ?? entryType;
+  String get severityLabel => severities[severity] ?? severity;
+
   factory ShiftLogEntryModel.fromJson(Map<String, dynamic> json) =>
       ShiftLogEntryModel(
         id: readInt(json['id']),
-        shiftId: readInt(json['shift_id']),
-        createdByUserId: readNullableInt(json['created_by_user_id']),
+        shiftId: readInt(json['shift'] ?? json['shift_id']),
+        createdByUserId: readNullableInt(
+          json['created_by_user'] ?? json['created_by_user_id'],
+        ),
         sectorId: readNullableInt(json['sector_id']),
         entryType: readString(json['entry_type']),
         severity: readString(json['severity']),
@@ -208,11 +310,14 @@ class ShiftLogEntryModel {
         description: readString(json['description']),
         occurredAt: readDateTime(json['occurred_at']),
         createdAt: readDateTime(json['created_at']),
+        guardName: readString(json['guard_name']),
+        condominiumName: readString(json['condominium_name']),
       );
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'shift_id': shiftId,
+    'shift': shiftId,
     'created_by_user_id': createdByUserId,
     'sector_id': sectorId,
     'entry_type': entryType,
@@ -221,6 +326,8 @@ class ShiftLogEntryModel {
     'description': description,
     'occurred_at': occurredAt.toIso8601String(),
     'created_at': createdAt.toIso8601String(),
+    'guard_name': guardName,
+    'condominium_name': condominiumName,
   };
 }
 
@@ -235,6 +342,9 @@ class ShiftHandoverModel {
     required this.deliveredAt,
     required this.receivedAt,
     required this.status,
+    this.outgoingDetail,
+    this.incomingDetail,
+    this.logEntries = const [],
   });
 
   final int id;
@@ -247,22 +357,58 @@ class ShiftHandoverModel {
   final DateTime? receivedAt;
   final String status;
 
+  final SecurityShiftModel? outgoingDetail;
+  final SecurityShiftModel? incomingDetail;
+  final List<ShiftLogEntryModel> logEntries;
+  String get statusLabel => switch (status) {
+    'PENDING' => 'Pendiente de recepción',
+    'RECEIVED' => 'Recibida',
+    'REJECTED' => 'Rechazada',
+    _ => status,
+  };
+
   factory ShiftHandoverModel.fromJson(Map<String, dynamic> json) =>
       ShiftHandoverModel(
         id: readInt(json['id']),
-        outgoingShiftId: readInt(json['outgoing_shift_id']),
-        incomingShiftId: readNullableInt(json['incoming_shift_id']),
-        deliveredByUserId: readNullableInt(json['delivered_by_user_id']),
-        receivedByUserId: readNullableInt(json['received_by_user_id']),
+        outgoingShiftId: readInt(
+          json['outgoing_shift'] ?? json['outgoing_shift_id'],
+        ),
+        incomingShiftId: readNullableInt(
+          json['incoming_shift'] ?? json['incoming_shift_id'],
+        ),
+        deliveredByUserId: readNullableInt(
+          json['delivered_by_user'] ?? json['delivered_by_user_id'],
+        ),
+        receivedByUserId: readNullableInt(
+          json['received_by_user'] ?? json['received_by_user_id'],
+        ),
         summary: readString(json['summary']),
         deliveredAt: readDateTime(json['delivered_at']),
         receivedAt: readNullableDateTime(json['received_at']),
         status: readString(json['status']),
+        outgoingDetail: json['outgoing_detail'] == null
+            ? null
+            : SecurityShiftModel.fromJson(
+                Map<String, dynamic>.from(json['outgoing_detail'] as Map),
+              ),
+        incomingDetail: json['incoming_detail'] == null
+            ? null
+            : SecurityShiftModel.fromJson(
+                Map<String, dynamic>.from(json['incoming_detail'] as Map),
+              ),
+        logEntries: (json['log_entries'] as List? ?? [])
+            .map(
+              (item) => ShiftLogEntryModel.fromJson(
+                Map<String, dynamic>.from(item as Map),
+              ),
+            )
+            .toList(),
       );
 
   Map<String, dynamic> toJson() => {
     'id': id,
     'outgoing_shift_id': outgoingShiftId,
+    'outgoing_shift': outgoingShiftId,
     'incoming_shift_id': incomingShiftId,
     'delivered_by_user_id': deliveredByUserId,
     'received_by_user_id': receivedByUserId,
@@ -270,6 +416,9 @@ class ShiftHandoverModel {
     'delivered_at': deliveredAt.toIso8601String(),
     'received_at': receivedAt?.toIso8601String(),
     'status': status,
+    'outgoing_detail': outgoingDetail?.toJson(),
+    'incoming_detail': incomingDetail?.toJson(),
+    'log_entries': logEntries.map((entry) => entry.toJson()).toList(),
   };
 }
 
@@ -455,4 +604,3 @@ class FaceMatchResultModel {
         modelVersion: readString(json['model_version']),
       );
 }
-

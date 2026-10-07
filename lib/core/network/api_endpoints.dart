@@ -2,13 +2,26 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   static const health = '/health/';
+  static const shiftLogs = '/security/novedades-turno/';
+  static const handovers = '/security/entregas-turno/';
 
   static const auth = _AuthEndpoints();
   static const security = _SecurityEndpoints();
+  static const securityShifts = _SecurityShiftEndpoints();
   static const visitorAuthorizations = _VisitorAuthorizationEndpoints();
   static const visitQr = _VisitQrEndpoints();
   static const units = _UnitEndpoints();
   static const residents = _ResidentEndpoints();
+}
+
+class _SecurityShiftEndpoints {
+  const _SecurityShiftEndpoints();
+
+  final String current = '/security/turnos/actual/';
+  final String upcoming = '/security/turnos/proximos/';
+  final String history = '/security/turnos/historial/';
+  String start(int id) => '/security/turnos/$id/iniciar/';
+  String close(int id) => '/security/turnos/$id/cerrar/';
 }
 
 class _SecurityEndpoints {

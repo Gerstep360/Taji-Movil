@@ -100,4 +100,14 @@ extension TajiUserAccess on TajiUser {
       hasPermission('register_visits') || hasPermission('manage_visits');
 
   bool get isAdmin => role?.slug == 'administrador';
+
+  /// CU13 móvil: consulta y operación del turno propio del guardia.
+  bool get canUseSecurityShifts =>
+      const [
+        'seguridad',
+        'guardia',
+        'security',
+      ].contains(role?.slug.toLowerCase()) ||
+      hasPermission('operate_security_shifts') ||
+      hasPermission('view_security_shifts');
 }
