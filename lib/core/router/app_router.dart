@@ -164,6 +164,8 @@ class AppRouter {
     // La bitácora de escaneos la lee el mismo permiso que valida los QR.
     if (location == AppRoute.qrScanHistory.path &&
         auth.user?.canValidateVisits != true) {
+      return AppRoute.home.path;
+    }
     if ([AppRoute.accessEvents.path, AppRoute.newAccessEvent.path].contains(location) &&
         auth.user?.canRegisterAccessEvents != true) {
       return AppRoute.home.path;

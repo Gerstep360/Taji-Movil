@@ -52,6 +52,65 @@ void main() {
     );
   });
 
+  test('un 503 muestra la referencia del servidor para poder rastrearlo', () {
+    final request = RequestOptions(path: '/visit-qr/3/generate/');
+    final failure = ApiFailure.fromDio(
+      DioException(
+        requestOptions: request,
+        response: Response<Map<String, dynamic>>(
+          requestOptions: request,
+          statusCode: 503,
+          data: {
+            'error': {
+              'code': 'service_unavailable',
+              'message': 'La base de datos no está disponible temporalmente.',
+              'trace_id': 'a1b2c3d4e5f6',
+              'exception': 'DataError',
+            },
+          },
+        ),
+      ),
+      fallback: 'No pudimos generar el pase QR.',
+    );
+
+    expect(failure.code, 'service_unavailable');
+    expect(failure.traceId, 'a1b2c3d4e5f6');
+    // La referencia es lo que permite citar el fallo y buscarlo en el log.
+    expect(
+      failure.displayMessage,
+      'La base de datos no está disponible temporalmente. (ref. a1b2c3d4e5f6)',
+    );
+    // `trace_id` y `exception` no son campos de formulario: sin excluirlos
+    // aparecerían como "Datos: ..." y taparían el mensaje real del servidor.
+    expect(failure.fields, isEmpty);
+  });
+
+  test('un rechazo de negocio no inventa una referencia', () {
+    final request = RequestOptions(path: '/visit-qr/3/generate/');
+    final failure = ApiFailure.fromDio(
+      DioException(
+        requestOptions: request,
+        response: Response<Map<String, dynamic>>(
+          requestOptions: request,
+          statusCode: 400,
+          data: {
+            'error': {
+              'code': 'validation_error',
+              'message': 'Revisa los campos indicados.',
+              'fields': {
+                'status_not_allowed': ['Visita expirada.'],
+              },
+            },
+          },
+        ),
+      ),
+      fallback: 'No pudimos generar el pase QR.',
+    );
+
+    expect(failure.traceId, isNull);
+    expect(failure.displayMessage, 'Visita: Visita expirada.');
+  });
+
   test(
     'tokens permanecen en el almacenamiento seguro hasta cerrar sesión',
     () async {
