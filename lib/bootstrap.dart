@@ -13,6 +13,7 @@ import 'core/theme/taji_theme.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/state/auth_controller.dart';
 import 'features/security/data/security_shift_repository.dart';
+import 'features/security/data/access_event_repository.dart';
 import 'features/security/data/shift_log_repository.dart';
 import 'features/security/data/handover_repository.dart';
 import 'features/visitors/data/visit_qr_repository.dart';
@@ -52,6 +53,9 @@ Future<void> bootstrap() async {
         Provider<ShiftLogDataSource>(create: (_) => ShiftLogRepository(api)),
         Provider<SecurityShiftDataSource>(
           create: (_) => SecurityShiftRepository(api),
+        ),
+        Provider<AccessEventDataSource>(
+          create: (_) => AccessEventRepository(api),
         ),
         Provider<AuthRepository>.value(value: repository),
         Provider<VisitorAuthorizationRepository>.value(
