@@ -24,6 +24,7 @@ class _FakeAuthController extends ChangeNotifier implements AuthController {
       description: 'Admin del sistema',
       permissions: [
         'validate_visits',
+        'register_entry_exit',
         'operate_security_shifts',
         'view_security_shifts',
       ],
@@ -123,6 +124,7 @@ void main() {
     // Verify sub-items inside expanded packages
     expect(find.text('Mi Condominio & SaaS'), findsOneWidget);
     expect(find.text('Pases QR de Visita'), findsOneWidget);
+    expect(find.text('Control de accesos (CU11)'), findsOneWidget);
     expect(find.text('Turnos de seguridad'), findsOneWidget);
   });
 }

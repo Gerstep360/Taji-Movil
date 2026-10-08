@@ -108,6 +108,18 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
+            if (user.canRegisterAccessEvents)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _ActionCard(
+                  icon: Icons.door_front_door_outlined,
+                  iconColor: TajiColors.primary,
+                  iconBackground: TajiColors.primarySoft,
+                  title: 'Control de accesos (CU11)',
+                  subtitle: 'Registra entradas, salidas y accesos denegados',
+                  onTap: () => context.push(AppRoute.accessEvents.path),
+                ),
+              ),
             if (['manage_visits', 'register_visits', 'validate_visits', 'register_entry_exit'].any(user.hasPermission))
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
