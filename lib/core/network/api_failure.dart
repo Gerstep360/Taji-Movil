@@ -6,6 +6,7 @@ class ApiFailure implements Exception {
     required this.message,
     this.statusCode,
     this.fields = const {},
+    this.traceId,
   });
 
   final String code;
@@ -13,11 +14,26 @@ class ApiFailure implements Exception {
   final int? statusCode;
   final Map<String, List<String>> fields;
 
+  /// Referencia del servidor para fallos no controlados (503/500).
+  ///
+  /// Sin ella, quien reporta "la base de datos no está disponible" no puede
+  /// decir qué petición fue, y el operador tiene que adivinar entre varias
+  /// líneas del log. Es el mismo identificador que viaja en la respuesta.
+  final String? traceId;
+
   String get displayMessage {
-    if (fields.isEmpty) return message;
-    final first = fields.entries.first;
-    if (first.value.isEmpty) return message;
-    return '${_fieldLabel(first.key)}: ${first.value.first}';
+    final base;
+    if (fields.isEmpty) {
+      base = message;
+    } else {
+      final first = fields.entries.first;
+      base = first.value.isEmpty
+          ? message
+          : '${_fieldLabel(first.key)}: ${first.value.first}';
+    }
+    // Solo en fallos no controlados: un rechazo de negocio no lleva referencia.
+    final reference = traceId;
+    return reference == null ? base : '$base (ref. $reference)';
   }
 
   factory ApiFailure.fromDio(DioException error, {required String fallback}) {
@@ -26,11 +42,13 @@ class ApiFailure implements Exception {
       final envelope = data['error'];
       if (envelope is Map) {
         final fields = _readFields(envelope['fields']);
+        final rawTrace = envelope['trace_id'];
         return ApiFailure(
           code: envelope['code']?.toString() ?? 'request_failed',
           message: envelope['message']?.toString() ?? fallback,
           statusCode: error.response?.statusCode,
           fields: fields,
+          traceId: rawTrace is String && rawTrace.isNotEmpty ? rawTrace : null,
         );
       }
 
@@ -73,9 +91,14 @@ class ApiFailure implements Exception {
     if (raw is! Map) return const {};
     final result = <String, List<String>>{};
     for (final entry in raw.entries) {
+      // `trace_id` es la referencia del fallo, no un campo de formulario: si no
+      // se excluye, un 503 se mostraría como "Datos: no disponible" en vez de
+      // como el mensaje que el servidor envío.
       if (entry.key == 'detail' ||
           entry.key == 'message' ||
-          entry.key == 'code') {
+          entry.key == 'code' ||
+          entry.key == 'trace_id' ||
+          entry.key == 'exception') {
         continue;
       }
       final value = entry.value;
@@ -105,6 +128,10 @@ class ApiFailure implements Exception {
         'phone': 'Teléfono',
         'password': 'Contraseña',
         'password_confirm': 'Confirmación',
+        // CU09: el backend rechaza la emisión del pase con estos códigos.
+        'status_not_allowed': 'Visita',
+        'visit_window_ended': 'Visita',
+        'ttl_minutes': 'Vigencia del QR',
         'visitor_first_name': 'Nombre',
         'visitor_last_name': 'Apellido',
         'visitor_document_number': 'Documento',
