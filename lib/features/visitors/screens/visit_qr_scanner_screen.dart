@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -35,6 +36,17 @@ class _VisitQrScannerScreenState extends State<VisitQrScannerScreen>
   late final VisitQrValidationController _controller;
   late final MobileScannerController _camera;
   final _manualToken = TextEditingController();
+
+  /// Identificador legible del terminal, enviado en cada escaneo.
+  ///
+  /// Se usa `defaultTargetPlatform` y no `dart:io` porque el proyecto también
+  /// compila para web, donde importar `dart:io` rompe el build.
+  late final String _deviceId = switch (defaultTargetPlatform) {
+        TargetPlatform.android => 'android',
+        TargetPlatform.iOS => 'ios',
+        _ => 'movil',
+      };
+
   bool _cameraMounted = true;
   bool _permissionDenied = false;
   bool _torchOn = false;
@@ -147,7 +159,14 @@ class _VisitQrScannerScreenState extends State<VisitQrScannerScreen>
 
   Future<void> _submit(String token, {String? notes}) async {
     setState(() => _submitting = true);
-    final answered = await _controller.validate(token, notes: notes);
+    // Identifica el terminal en la bitácora de escaneos. Se usa el modelo del
+    // dispositivo porque en una porteria hay mas de un equipo y sin esto la
+    // bitácora no permite saber de donde salio cada lectura.
+    final answered = await _controller.validate(
+      token,
+      notes: notes,
+      deviceId: _deviceId,
+    );
     if (!mounted) return;
     setState(() {
       _submitting = false;

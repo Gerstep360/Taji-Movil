@@ -13,6 +13,7 @@ enum AppRoute {
   visitorAuthorizations('/autorizaciones-visita'),
   visitQr('/qr-visita/:authorizationId'),
   visitQrScanner('/escanear-qr'),
+  qrScanHistory('/bitacora-escaneos'),
   visitConsultation('/visitas-dentro');
 
   const AppRoute(this.path);

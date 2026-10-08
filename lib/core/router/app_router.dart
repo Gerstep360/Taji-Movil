@@ -15,6 +15,7 @@ import '../../features/security/screens/shift_logs_screen.dart';
 import '../../features/security/screens/handovers_screen.dart';
 import '../../features/security/screens/face_verification_screen.dart';
 import '../../features/visitors/models/visitor_authorization.dart';
+import '../../features/visitors/screens/qr_scan_history_screen.dart';
 import '../../features/visitors/screens/visit_consultation_screen.dart';
 import '../../features/visitors/screens/visit_qr_scanner_screen.dart';
 import '../../features/visitors/screens/visit_qr_screen.dart';
@@ -88,6 +89,13 @@ class AppRouter {
         name: AppRoute.visitQrScanner.name,
         builder: (_, __) => const VisitQrScannerScreen(),
       ),
+      // CU10: bitácora de escaneos. El registro vive en el servidor, así que
+      // a diferencia del historial del lector sobrevive a cerrar la app.
+      GoRoute(
+        path: AppRoute.qrScanHistory.path,
+        name: AppRoute.qrScanHistory.name,
+        builder: (_, __) => const QrScanHistoryScreen(),
+      ),
       GoRoute(
         path: AppRoute.home.path,
         name: AppRoute.home.name,
@@ -153,6 +161,9 @@ class AppRouter {
         auth.user?.canUseSecurityShifts != true) {
       return AppRoute.home.path;
     }
+    // La bitácora de escaneos la lee el mismo permiso que valida los QR.
+    if (location == AppRoute.qrScanHistory.path &&
+        auth.user?.canValidateVisits != true) {
     if ([AppRoute.accessEvents.path, AppRoute.newAccessEvent.path].contains(location) &&
         auth.user?.canRegisterAccessEvents != true) {
       return AppRoute.home.path;
@@ -171,6 +182,7 @@ class AppRouter {
     AppRoute.faceVerification,
     AppRoute.visitorAuthorizations,
     AppRoute.visitQrScanner,
+    AppRoute.qrScanHistory,
     AppRoute.visitQr,
     AppRoute.visitConsultation,
   ];
