@@ -124,6 +124,10 @@ class TajiUser {
 extension TajiUserAccess on TajiUser {
   bool hasPermission(String code) => role?.permissions.contains(code) ?? false;
 
+  /// CU11: registra eventos de entrada, salida y acceso denegado en portería.
+  bool get canRegisterAccessEvents =>
+      isAdmin || hasPermission('register_entry_exit');
+
   /// Personal de seguridad y administración: puede escanear y validar QR en
   /// portería. El rol `seguridad` y el `administrador` lo tienen; el resto no.
   bool get canValidateVisits =>

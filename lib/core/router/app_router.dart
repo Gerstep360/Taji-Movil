@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/auth/screens/home_screen.dart';
@@ -8,6 +9,8 @@ import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
 import '../../features/auth/models/taji_user.dart';
 import '../../features/security/screens/security_shifts_screen.dart';
+import '../../features/security/screens/access_events_screen.dart';
+import '../../features/security/data/access_event_repository.dart';
 import '../../features/security/screens/shift_logs_screen.dart';
 import '../../features/security/screens/handovers_screen.dart';
 import '../../features/security/screens/face_verification_screen.dart';
@@ -99,6 +102,18 @@ class AppRouter {
         builder: (_, __) => const HomeScreen(),
       ),
       GoRoute(
+        path: AppRoute.accessEvents.path,
+        name: AppRoute.accessEvents.name,
+        builder: (_, __) => const AccessEventsScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.newAccessEvent.path,
+        name: AppRoute.newAccessEvent.name,
+        builder: (context, __) => AccessEventFormScreen(
+          source: context.read<AccessEventDataSource>(),
+        ),
+      ),
+      GoRoute(
         path: AppRoute.securityShifts.path,
         name: AppRoute.securityShifts.name,
         builder: (_, __) => const SecurityShiftsScreen(),
@@ -149,6 +164,8 @@ class AppRouter {
     // La bitácora de escaneos la lee el mismo permiso que valida los QR.
     if (location == AppRoute.qrScanHistory.path &&
         auth.user?.canValidateVisits != true) {
+    if ([AppRoute.accessEvents.path, AppRoute.newAccessEvent.path].contains(location) &&
+        auth.user?.canRegisterAccessEvents != true) {
       return AppRoute.home.path;
     }
     return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
@@ -157,6 +174,8 @@ class AppRouter {
   /// Rutas accesibles con sesión iniciada.
   static const _authenticatedRoutes = [
     AppRoute.home,
+    AppRoute.accessEvents,
+    AppRoute.newAccessEvent,
     AppRoute.securityShifts,
     AppRoute.shiftLogs,
     AppRoute.handovers,

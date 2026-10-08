@@ -5,6 +5,7 @@ class ApiEndpoints {
   static const visitConsultation = '/security/cu12/visits/';
   static const shiftLogs = '/security/novedades-turno/';
   static const handovers = '/security/entregas-turno/';
+  static const accessEvents = _AccessEventEndpoints();
 
   static const auth = _AuthEndpoints();
   static const security = _SecurityEndpoints();
@@ -33,6 +34,14 @@ class _SecurityEndpoints {
   final String faceMatch = '/security/cu17/face-verification/match/';
   final String faceConfirm = '/security/cu17/face-verification/confirm/';
   final String faceLogs = '/security/cu17/face-verification/';
+}
+
+class _AccessEventEndpoints {
+  const _AccessEventEndpoints();
+
+  final String collection = '/security/access-events/';
+  final String people = '/security/access-events/people/';
+  final String units = '/security/access-events/units/';
 }
 
 class _ResidentEndpoints {

@@ -1,4 +1,5 @@
 export 'accounts_models.dart';
+export 'access_event_models.dart';
 export 'audit_models.dart';
 export 'community_models.dart';
 export 'condominium_models.dart';

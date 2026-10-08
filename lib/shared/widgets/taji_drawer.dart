@@ -155,6 +155,14 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     onToggle: () => _togglePackage('paquete2'),
                     activeCount: _countAvailableSecurity(user),
                     items: [
+                      if (user?.canRegisterAccessEvents ?? false)
+                        _DrawerSubItem(
+                          label: 'Control de accesos (CU11)',
+                          icon: Icons.door_front_door_outlined,
+                          route: AppRoute.accessEvents.path,
+                          isActive: currentLocation.startsWith(AppRoute.accessEvents.path),
+                          isAvailable: true,
+                        ),
                       _DrawerSubItem(
                         label: 'Visitantes y Autorizaciones',
                         icon: Icons.how_to_reg_outlined,
@@ -510,6 +518,7 @@ class _TajiDrawerState extends State<TajiDrawer> {
 
   int _countAvailableSecurity(TajiUser? user) {
     int count = 3; // Visitantes, Pases QR, Personas dentro (Verificación Facial se movió a Paquete 3)
+    if (user?.canRegisterAccessEvents ?? false) count++;
     if (user?.canValidateVisits ?? false) count++;
     if (user?.canUseSecurityShifts ?? false) count += 3;
     return count;
