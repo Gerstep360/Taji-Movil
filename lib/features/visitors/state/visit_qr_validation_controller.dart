@@ -57,7 +57,11 @@ class VisitQrValidationController extends ChangeNotifier {
   ///
   /// Repetir el mismo token sin haber pulsado "escanear otro" se ignora: el
   /// backend sí aceptaría el reescaneo y registraría un segundo evento.
-  Future<bool> validate(String rawToken, {String? notes}) async {
+  ///
+  /// `deviceId` identifica el terminal en la bitácora. Antes no se enviaba
+  /// nunca, así que la columna quedaba vacía y la bitácora no distinguía entre
+  /// equipos de una misma portería.
+  Future<bool> validate(String rawToken, {String? notes, String? deviceId}) async {
     final token = rawToken.trim();
     if (token.isEmpty || validating) return false;
     if (isPaused && token == _lastToken) return false;
@@ -66,7 +70,11 @@ class VisitQrValidationController extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
-      final validation = await _repository.validate(token: token, notes: notes);
+      final validation = await _repository.validate(
+        token: token,
+        notes: notes,
+        deviceId: deviceId,
+      );
       _result = validation;
       _lastToken = token;
       _history.insert(0, ScanLogEntry(validation: validation, rawToken: token));

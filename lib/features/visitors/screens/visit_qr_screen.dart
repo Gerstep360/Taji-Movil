@@ -219,7 +219,7 @@ class _QrCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!controller.hasQrImage) {
-      return const _QrPlaceholder();
+      return _QrPlaceholder(busy: controller.generating);
     }
     final dimmed = controller.isExpired;
     return Container(
@@ -313,7 +313,11 @@ class _CodeNotice extends StatelessWidget {
 }
 
 class _QrPlaceholder extends StatelessWidget {
-  const _QrPlaceholder();
+  const _QrPlaceholder({required this.busy});
+
+  /// Cuando se esta generando el QR al abrir la pantalla, el aviso debe
+  /// decir eso y no "aun no hay un QR emitido", que ya no es cierto.
+  final bool busy;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -323,14 +327,25 @@ class _QrPlaceholder extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       border: Border.all(color: TajiColors.border),
     ),
-    child: const Column(
+    child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.qr_code_2_outlined, size: 54, color: TajiColors.border),
-        SizedBox(height: 12),
+        if (busy)
+          const SizedBox(
+            height: 34,
+            width: 34,
+            child: CircularProgressIndicator(strokeWidth: 3),
+          )
+        else
+          const Icon(
+            Icons.qr_code_2_outlined,
+            size: 54,
+            color: TajiColors.border,
+          ),
+        const SizedBox(height: 12),
         Text(
-          'Todavía no hay un QR emitido',
-          style: TextStyle(
+          busy ? 'Generando tu QR…' : 'Todavía no hay un QR emitido',
+          style: const TextStyle(
             color: TajiColors.muted,
             fontWeight: FontWeight.w700,
             fontSize: 14,

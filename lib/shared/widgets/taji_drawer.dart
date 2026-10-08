@@ -177,6 +177,14 @@ class _TajiDrawerState extends State<TajiDrawer> {
                           isActive: currentLocation == AppRoute.visitQrScanner.path,
                           isAvailable: true,
                         ),
+                      if (user?.canValidateVisits ?? false)
+                        _DrawerSubItem(
+                          label: 'Bitácora de escaneos',
+                          icon: Icons.history_rounded,
+                          route: AppRoute.qrScanHistory.path,
+                          isActive: currentLocation == AppRoute.qrScanHistory.path,
+                          isAvailable: true,
+                        ),
                       if (user?.canUseSecurityShifts ?? false)
                         _DrawerSubItem(
                           label: 'Turnos de seguridad',

@@ -69,12 +69,35 @@ class VisitQrController extends ChangeNotifier {
     notifyListeners();
     try {
       _apply(await _repository.status(authorizationId));
+      // Al abrir la pantalla se pide el QR directamente en vez de mostrar un
+      // aviso de "generar". El `generate` sin `force` es idempotente en el
+      // backend: si ya habia un QR vigente lo deja intacto y responde 200 sin
+      // payload, de modo que no se invalida el codigo que ya se compartio.
+      await _autoGenerateIfNeeded();
     } on ApiFailure catch (failure) {
       error = failure.displayMessage;
     } finally {
       loading = false;
       notifyListeners();
     }
+  }
+
+  /// Emite el QR solo cuando de verdad hace falta: que no exista todavia o que
+  /// el que hay haya caducado.
+  ///
+  /// No se emite cuando hay un QR vigente emitido desde otro dispositivo: su
+  /// contenido no se puede recuperar porque el servidor solo guarda el hash, y
+  /// rotarlo sin que el residente lo pida dejaria sin codigo al que ya
+  /// compartio el QR anterior. En ese caso se mantiene el aviso de rotar.
+  Future<void> _autoGenerateIfNeeded() async {
+    if (isBlockedByStatus) return;
+
+    final hasUsableQr = hasQrImage && !isExpired;
+    if (hasUsableQr) return;
+    if (needsRotation) return;
+    if (generating) return;
+
+    await generate();
   }
 
   /// Emite el QR. Devuelve `true` si hay una imagen lista para mostrar.

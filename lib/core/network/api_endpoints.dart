@@ -73,6 +73,15 @@ class _VisitQrEndpoints {
 
   /// Catálogo de motivos de rechazo, para no codificar textos en la app.
   final String validateReasons = '/visit-qr/validate/reasons/';
+
+  /// Bitácora de escaneos de portería, con los totales de la ventana.
+  ///
+  /// A diferencia de la lista en memoria del lector, esta sobrevive al cierre
+  /// de la app: el registro vive en el servidor.
+  final String scanHistory = '/security/visit-qr/scans/';
+
+  /// Guardias con actividad de escaneo, para filtrar la bitácora.
+  final String scanGuards = '/security/visit-qr/scans/guards/';
 }
 
 class _AuthEndpoints {

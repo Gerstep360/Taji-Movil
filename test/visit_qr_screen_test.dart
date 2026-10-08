@@ -152,17 +152,13 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('sin QR emitido ofrece generarlo y lo hace al pulsarlo', (
+  testWidgets('emite el QR solo al abrir la pantalla, sin pulsar nada', (
     tester,
   ) async {
     await pumpScreen(tester, _FakeVisitQrRepository());
 
-    expect(find.text('Todavía no hay un QR emitido'), findsOneWidget);
-    expect(find.text('QR sin emitir'), findsOneWidget);
-    expect(find.byType(QrImageView), findsNothing);
-
-    await tapAfterScroll(tester, 'Generar QR');
-
+    // Antes habia que pulsar "Generar QR"; ahora la pantalla lo pide sola al
+    // cargar, que es como la usa el residente de verdad.
     expect(find.byType(QrImageView), findsOneWidget);
     expect(find.text('QR vigente'), findsOneWidget);
   });
