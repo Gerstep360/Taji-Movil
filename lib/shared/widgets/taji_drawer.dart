@@ -241,7 +241,7 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.auto_awesome_rounded,
                     isExpanded: _isExpanded('paquete3'),
                     onToggle: () => _togglePackage('paquete3'),
-                    activeCount: 1,
+                    activeCount: (user?.canReportIncidents ?? false) ? 2 : 1,
                     items: [
                       _DrawerSubItem(
                         label: 'Reconocimiento Facial',
@@ -250,10 +250,13 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         isActive: currentLocation == AppRoute.faceVerification.path,
                         isAvailable: true,
                       ),
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
                         label: 'Reportar Incidencia',
                         icon: Icons.report_problem_outlined,
-                        isAvailable: false,
+                        route: AppRoute.reportIncident.path,
+                        isActive:
+                            currentLocation == AppRoute.reportIncident.path,
+                        isAvailable: user?.canReportIncidents ?? false,
                       ),
                       const _DrawerSubItem(
                         label: 'Seguimiento y Ciclo',
