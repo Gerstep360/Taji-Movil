@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/router/app_routes.dart';
-import '../../core/theme/taji_theme.dart';
 import '../../features/auth/models/taji_user.dart';
 import '../../features/auth/state/auth_controller.dart';
 import 'taji_logo.dart';
@@ -255,10 +254,12 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         icon: Icons.report_problem_outlined,
                         isAvailable: false,
                       ),
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
                         label: 'Seguimiento y Ciclo',
                         icon: Icons.alt_route_rounded,
-                        isAvailable: false,
+                        route: AppRoute.incidents.path,
+                        isActive: currentLocation == AppRoute.incidents.path,
+                        isAvailable: true,
                       ),
                       const _DrawerSubItem(
                         label: 'Clasificación con IA',

@@ -2,6 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   static const health = '/health/';
+  static const incidents = '/paquete3/incidents/';
   static const visitConsultation = '/security/cu12/visits/';
   static const shiftLogs = '/security/novedades-turno/';
   static const handovers = '/security/entregas-turno/';

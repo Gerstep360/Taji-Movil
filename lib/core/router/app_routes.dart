@@ -4,6 +4,7 @@ enum AppRoute {
   register('/crear-cuenta'),
   forgotPassword('/recuperar-contrasena'),
   home('/inicio'),
+  incidents('/incidencias'),
   accessEvents('/control-accesos'),
   newAccessEvent('/control-accesos/nuevo'),
   securityShifts('/mis-turnos'),
