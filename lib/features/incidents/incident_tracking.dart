@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/network/api_endpoints.dart';
 import '../../core/network/api_failure.dart';
 import '../../shared/widgets/taji_drawer.dart';
+import 'incident_ai_panel.dart';
 
 class IncidentStep {
   IncidentStep.fromJson(Map<String, dynamic> json)
@@ -298,6 +299,7 @@ class _IncidentTrackingScreenState extends State<IncidentTrackingScreen> {
                 subtitle: Text(date(item.due)),
               ),
               const Divider(height: 36),
+              IncidentAIPanel(code: item.code),
               Text(
                 'Línea de tiempo',
                 style: Theme.of(context).textTheme.titleLarge,
