@@ -14,7 +14,9 @@ enum AppRoute {
   visitQr('/qr-visita/:authorizationId'),
   visitQrScanner('/escanear-qr'),
   qrScanHistory('/bitacora-escaneos'),
-  visitConsultation('/visitas-dentro');
+  visitConsultation('/visitas-dentro'),
+  // CU18 / T114-T115: registrar una incidencia con evidencias.
+  reportIncident('/incidencias/nueva');
 
   const AppRoute(this.path);
   final String path;

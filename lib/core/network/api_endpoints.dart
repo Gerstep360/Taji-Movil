@@ -13,6 +13,7 @@ class ApiEndpoints {
   static const visitorAuthorizations = _VisitorAuthorizationEndpoints();
   static const visitQr = _VisitQrEndpoints();
   static const units = _UnitEndpoints();
+  static const incidents = _IncidentEndpoints();
   static const residents = _ResidentEndpoints();
   static const publicCondominiums = '/saas/condominiums/public/';
 }
@@ -42,6 +43,17 @@ class _AccessEventEndpoints {
   final String collection = '/security/access-events/';
   final String people = '/security/access-events/people/';
   final String units = '/security/access-events/units/';
+}
+
+/// CU18 / RF-18: registro de incidencias con evidencias (multipart).
+class _IncidentEndpoints {
+  const _IncidentEndpoints();
+
+  final String collection = '/incidents/';
+
+  /// Catálogo del formulario: categorías, sectores, unidades, activos y las
+  /// reglas de evidencia que aplica el servidor.
+  final String options = '/incidents/options/';
 }
 
 class _ResidentEndpoints {
