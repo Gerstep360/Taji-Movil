@@ -23,6 +23,7 @@ import '../../features/visitors/screens/visitor_authorizations_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
 import '../../features/incidents/incident_tracking.dart';
+import '../../features/incidents/incident_report_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -34,9 +35,16 @@ class AppRouter {
     errorBuilder: (_, __) => const _RouteNotFoundScreen(),
     routes: [
       GoRoute(
+        path: AppRoute.reportIncident.path,
+        name: AppRoute.reportIncident.name,
+        builder: (_, __) => const IncidentReportScreen(),
+      ),
+      GoRoute(
         path: AppRoute.incidents.path,
         name: AppRoute.incidents.name,
-        builder: (_, __) => const IncidentTrackingScreen(),
+        builder: (_, state) => IncidentTrackingScreen(
+          initialCode: state.uri.queryParameters['codigo'],
+        ),
       ),
       GoRoute(
         path: AppRoute.visitConsultation.path,
@@ -159,6 +167,10 @@ class AppRouter {
           ? AppRoute.login.path
           : null;
     }
+    if (location == AppRoute.reportIncident.path &&
+        auth.user?.canReportIncidents != true) {
+      return AppRoute.home.path;
+    }
     if ([
           AppRoute.securityShifts.path,
           AppRoute.shiftLogs.path,
@@ -184,6 +196,7 @@ class AppRouter {
 
   /// Rutas accesibles con sesión iniciada.
   static const _authenticatedRoutes = [
+    AppRoute.reportIncident,
     AppRoute.incidents,
     AppRoute.home,
     AppRoute.accessEvents,

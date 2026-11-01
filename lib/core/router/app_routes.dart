@@ -5,6 +5,7 @@ enum AppRoute {
   forgotPassword('/recuperar-contrasena'),
   home('/inicio'),
   incidents('/incidencias'),
+  reportIncident('/reportar-incidencia'),
   accessEvents('/control-accesos'),
   newAccessEvent('/control-accesos/nuevo'),
   securityShifts('/mis-turnos'),

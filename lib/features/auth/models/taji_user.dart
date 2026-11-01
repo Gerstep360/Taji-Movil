@@ -65,6 +65,7 @@ class TajiUser {
     this.role,
     this.activeTenant,
     this.residentUnits = const [],
+    this.isSuperuser = false,
   });
 
   final int id;
@@ -76,6 +77,7 @@ class TajiUser {
   final TajiRole? role;
   final TajiTenant? activeTenant;
   final List<Map<String, dynamic>> residentUnits;
+  final bool isSuperuser;
 
   String get initials {
     final first = firstName.isEmpty ? '' : firstName[0];
@@ -84,6 +86,7 @@ class TajiUser {
   }
 
   factory TajiUser.fromJson(Map<String, dynamic> json) => TajiUser(
+    isSuperuser: json['is_superuser'] == true,
     id: json['id'] as int,
     email: json['email'] as String? ?? '',
     firstName: json['first_name'] as String? ?? '',
@@ -103,6 +106,7 @@ class TajiUser {
   );
 
   Map<String, dynamic> toJson() => {
+    'is_superuser': isSuperuser,
     'id': id,
     'email': email,
     'first_name': firstName,
@@ -122,6 +126,10 @@ class TajiUser {
 /// solo evitan mostrar una acción que el servidor va a rechazar; nunca
 /// sustituyen la validación del servidor.
 extension TajiUserAccess on TajiUser {
+  bool get canReportIncidents =>
+      isSuperuser ||
+      hasPermission('report_incidents') ||
+      hasPermission('manage_incidents');
   bool hasPermission(String code) => role?.permissions.contains(code) ?? false;
 
   /// CU11: registra eventos de entrada, salida y acceso denegado en portería.
@@ -141,7 +149,8 @@ extension TajiUserAccess on TajiUser {
       hasPermission('manage_visits') ||
       role?.slug == 'residente';
 
-  bool get isAdmin => role?.slug == 'administrador' || role?.slug == 'superadmin';
+  bool get isAdmin =>
+      role?.slug == 'administrador' || role?.slug == 'superadmin';
 
   /// CU13 móvil: consulta y operación del turno propio del guardia.
   bool get canUseSecurityShifts =>

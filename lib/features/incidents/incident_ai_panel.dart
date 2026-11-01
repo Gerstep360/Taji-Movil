@@ -15,6 +15,7 @@ class IncidentAIPanel extends StatefulWidget {
 class _IncidentAIPanelState extends State<IncidentAIPanel> {
   IncidentAIResult? result;
   String? error;
+  bool? processorAvailable;
   bool loading = true;
   Timer? timer;
   int polls = 0;
@@ -66,6 +67,8 @@ class _IncidentAIPanelState extends State<IncidentAIPanel> {
       if (!mounted || widget.code != code) return;
       setState(() {
         result = next;
+        processorAvailable =
+            (response['processor'] as Map?)?['available'] as bool?;
       });
       if (next?.pending == true && polls++ < 30) {
         timer = Timer(const Duration(seconds: 2), load);
@@ -137,7 +140,11 @@ class _IncidentAIPanelState extends State<IncidentAIPanel> {
               'Todavía no hay un análisis. El equipo puede clasificar esta incidencia manualmente.',
             ),
           if (analysis != null) ...[
-            if (analysis.pending)
+            if (analysis.pending && processorAvailable == false)
+              const Text(
+                'El procesador IA está desconectado. Tu reporte está guardado; no necesitas enviarlo otra vez.',
+              ),
+            if (analysis.pending && processorAvailable != false)
               const Text(
                 'El análisis está en proceso. Puedes seguir usando la app.',
               ),
@@ -189,7 +196,7 @@ class _IncidentAIPanelState extends State<IncidentAIPanel> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(
-                    '${risk.name} · ${contextLabel(risk.context)}\n«${risk.evidence}»',
+                    '${risk.name} · ${contextLabel(risk.context)}\n${risk.source == 'image' ? 'Observación visual por verificar · foto #${risk.attachmentId}' : 'Cita del reporte'}\n«${risk.evidence}»',
                   ),
                 ),
               const SizedBox(height: 16),

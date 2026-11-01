@@ -81,6 +81,9 @@ class ApiClient {
 
     request.headers['Authorization'] = 'Bearer $access';
     request.extra['retried'] = true;
+    if (request.data is FormData) {
+      request.data = (request.data as FormData).clone();
+    }
     try {
       handler.resolve(await dio.fetch<dynamic>(request));
     } on DioException catch (retryError) {

@@ -79,7 +79,8 @@ class IncidentTrackingRepository {
 }
 
 class IncidentTrackingScreen extends StatefulWidget {
-  const IncidentTrackingScreen({super.key});
+  const IncidentTrackingScreen({this.initialCode, super.key});
+  final String? initialCode;
   @override
   State<IncidentTrackingScreen> createState() => _IncidentTrackingScreenState();
 }
@@ -99,6 +100,7 @@ class _IncidentTrackingScreenState extends State<IncidentTrackingScreen> {
       initialized = true;
       repository = IncidentTrackingRepository(context.read<ApiClient>());
       load();
+      if (widget.initialCode != null) openCode(widget.initialCode!);
     }
   }
 
@@ -134,13 +136,15 @@ class _IncidentTrackingScreenState extends State<IncidentTrackingScreen> {
     }
   }
 
-  Future<void> open(TrackedIncident item) async {
+  Future<void> open(TrackedIncident item) => openCode(item.code);
+
+  Future<void> openCode(String code) async {
     setState(() {
       loading = true;
       error = null;
     });
     try {
-      final response = await repository.detail(item.code);
+      final response = await repository.detail(code);
       if (mounted) {
         setState(() {
           detail = response;

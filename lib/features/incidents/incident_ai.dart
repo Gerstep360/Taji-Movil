@@ -1,11 +1,21 @@
 class IncidentAIRisk {
-  const IncidentAIRisk(this.name, this.evidence, this.context);
+  const IncidentAIRisk(
+    this.name,
+    this.evidence,
+    this.context, {
+    this.source = 'text',
+    this.attachmentId,
+  });
   factory IncidentAIRisk.fromJson(Map<String, dynamic> value) => IncidentAIRisk(
     value['name'] as String? ?? '',
     value['evidence'] as String? ?? '',
     value['context'] as String? ?? 'uncertain',
+    source: value['source'] as String? ?? 'text',
+    attachmentId: value['attachment_id'] as int?,
   );
   final String name, evidence, context;
+  final String source;
+  final int? attachmentId;
 }
 
 class IncidentAIResult {

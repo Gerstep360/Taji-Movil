@@ -82,7 +82,10 @@ class _TajiDrawerState extends State<TajiDrawer> {
             // NAV SCROLLABLE (Igual que Web main-layout)
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 children: [
                   // INICIO DIRECTO
                   _DirectNavItem(
@@ -159,14 +162,18 @@ class _TajiDrawerState extends State<TajiDrawer> {
                           label: 'Control de accesos (CU11)',
                           icon: Icons.door_front_door_outlined,
                           route: AppRoute.accessEvents.path,
-                          isActive: currentLocation.startsWith(AppRoute.accessEvents.path),
+                          isActive: currentLocation.startsWith(
+                            AppRoute.accessEvents.path,
+                          ),
                           isAvailable: true,
                         ),
                       _DrawerSubItem(
                         label: 'Visitantes y Autorizaciones',
                         icon: Icons.how_to_reg_outlined,
                         route: AppRoute.visitorAuthorizations.path,
-                        isActive: currentLocation.startsWith('/autorizaciones-visita'),
+                        isActive: currentLocation.startsWith(
+                          '/autorizaciones-visita',
+                        ),
                         isAvailable: true,
                       ),
                       _DrawerSubItem(
@@ -181,7 +188,8 @@ class _TajiDrawerState extends State<TajiDrawer> {
                           label: 'Escanear QR en Portería',
                           icon: Icons.qr_code_scanner_rounded,
                           route: AppRoute.visitQrScanner.path,
-                          isActive: currentLocation == AppRoute.visitQrScanner.path,
+                          isActive:
+                              currentLocation == AppRoute.visitQrScanner.path,
                           isAvailable: true,
                         ),
                       if (user?.canValidateVisits ?? false)
@@ -189,7 +197,8 @@ class _TajiDrawerState extends State<TajiDrawer> {
                           label: 'Bitácora de escaneos',
                           icon: Icons.history_rounded,
                           route: AppRoute.qrScanHistory.path,
-                          isActive: currentLocation == AppRoute.qrScanHistory.path,
+                          isActive:
+                              currentLocation == AppRoute.qrScanHistory.path,
                           isAvailable: true,
                         ),
                       if (user?.canUseSecurityShifts ?? false)
@@ -197,14 +206,16 @@ class _TajiDrawerState extends State<TajiDrawer> {
                           label: 'Turnos de seguridad',
                           icon: Icons.schedule_rounded,
                           route: AppRoute.securityShifts.path,
-                          isActive: currentLocation == AppRoute.securityShifts.path,
+                          isActive:
+                              currentLocation == AppRoute.securityShifts.path,
                           isAvailable: true,
                         ),
                       _DrawerSubItem(
                         label: 'Visitas y personas dentro',
                         icon: Icons.people_alt_outlined,
                         route: AppRoute.visitConsultation.path,
-                        isActive: currentLocation == AppRoute.visitConsultation.path,
+                        isActive:
+                            currentLocation == AppRoute.visitConsultation.path,
                         isAvailable: true,
                       ),
                       if (user?.canUseSecurityShifts ?? false)
@@ -240,20 +251,25 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.auto_awesome_rounded,
                     isExpanded: _isExpanded('paquete3'),
                     onToggle: () => _togglePackage('paquete3'),
-                    activeCount: 1,
+                    activeCount: (user?.canReportIncidents ?? false) ? 3 : 2,
                     items: [
                       _DrawerSubItem(
                         label: 'Reconocimiento Facial',
                         icon: Icons.face_retouching_natural_rounded,
                         route: AppRoute.faceVerification.path,
-                        isActive: currentLocation == AppRoute.faceVerification.path,
+                        isActive:
+                            currentLocation == AppRoute.faceVerification.path,
                         isAvailable: true,
                       ),
-                      const _DrawerSubItem(
-                        label: 'Reportar Incidencia',
-                        icon: Icons.report_problem_outlined,
-                        isAvailable: false,
-                      ),
+                      if (user?.canReportIncidents ?? false)
+                        _DrawerSubItem(
+                          label: 'Reportar Incidencia',
+                          icon: Icons.report_problem_outlined,
+                          route: AppRoute.reportIncident.path,
+                          isActive:
+                              currentLocation == AppRoute.reportIncident.path,
+                          isAvailable: true,
+                        ),
                       _DrawerSubItem(
                         label: 'Seguimiento y Ciclo',
                         icon: Icons.alt_route_rounded,
@@ -354,7 +370,10 @@ class _TajiDrawerState extends State<TajiDrawer> {
                       onTap: () => _showCondominiumInfo(context, user),
                       borderRadius: BorderRadius.circular(10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(10),
@@ -367,7 +386,9 @@ class _TajiDrawerState extends State<TajiDrawer> {
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: const Color(0xFFCBD5E1)),
+                                border: Border.all(
+                                  color: const Color(0xFFCBD5E1),
+                                ),
                               ),
                               child: const Icon(
                                 Icons.apartment_rounded,
@@ -390,7 +411,8 @@ class _TajiDrawerState extends State<TajiDrawer> {
                                     ),
                                   ),
                                   Text(
-                                    user?.activeTenant?.name ?? 'Condominio Taji',
+                                    user?.activeTenant?.name ??
+                                        'Condominio Taji',
                                     style: const TextStyle(
                                       color: Color(0xFF10233C),
                                       fontSize: 12,
@@ -407,10 +429,16 @@ class _TajiDrawerState extends State<TajiDrawer> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                    vertical: 1.5,
+                                  ),
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
-                                      colors: [Color(0xFF2563EB), Color(0xFF0F6FFF)],
+                                      colors: [
+                                        Color(0xFF2563EB),
+                                        Color(0xFF0F6FFF),
+                                      ],
                                     ),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
@@ -424,10 +452,14 @@ class _TajiDrawerState extends State<TajiDrawer> {
                                     ),
                                   ),
                                 ),
-                                if (user?.activeTenant?.slug != null && user!.activeTenant!.slug.isNotEmpty) ...[
+                                if (user?.activeTenant?.slug != null &&
+                                    user!.activeTenant!.slug.isNotEmpty) ...[
                                   const SizedBox(height: 2),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 1,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFE2E8F0),
                                       borderRadius: BorderRadius.circular(3),
@@ -518,7 +550,8 @@ class _TajiDrawerState extends State<TajiDrawer> {
   }
 
   int _countAvailableSecurity(TajiUser? user) {
-    int count = 3; // Visitantes, Pases QR, Personas dentro (Verificación Facial se movió a Paquete 3)
+    int count =
+        3; // Visitantes, Pases QR, Personas dentro (Verificación Facial se movió a Paquete 3)
     if (user?.canRegisterAccessEvents ?? false) count++;
     if (user?.canValidateVisits ?? false) count++;
     if (user?.canUseSecurityShifts ?? false) count += 3;
@@ -531,7 +564,10 @@ class _TajiDrawerState extends State<TajiDrawer> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 10,
+        ),
         title: Row(
           children: [
             Container(
@@ -542,7 +578,11 @@ class _TajiDrawerState extends State<TajiDrawer> {
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Icon(Icons.cloud_done_rounded, color: Colors.white, size: 22),
+              child: const Icon(
+                Icons.cloud_done_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
             ),
             const SizedBox(width: 12),
             const Expanded(
@@ -551,11 +591,19 @@ class _TajiDrawerState extends State<TajiDrawer> {
                 children: [
                   Text(
                     'Instancia SaaS Multi-Tenant',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF10233C)),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF10233C),
+                    ),
                   ),
                   Text(
                     'Plataforma Cloud Taji Enterprise',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -584,12 +632,19 @@ class _TajiDrawerState extends State<TajiDrawer> {
                       Expanded(
                         child: Text(
                           user?.activeTenant?.name ?? 'Condominio Taji',
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF10233C)),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF10233C),
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [Color(0xFF2563EB), Color(0xFF0F6FFF)],
@@ -598,7 +653,11 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         ),
                         child: const Text(
                           'PLAN PRO',
-                          style: TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w900),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8.5,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ),
                     ],
@@ -606,12 +665,27 @@ class _TajiDrawerState extends State<TajiDrawer> {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.fingerprint_rounded, size: 13, color: Color(0xFF64748B)),
+                      const Icon(
+                        Icons.fingerprint_rounded,
+                        size: 13,
+                        color: Color(0xFF64748B),
+                      ),
                       const SizedBox(width: 4),
-                      const Text('Tenant ID: ', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                      const Text(
+                        'Tenant ID: ',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
                       Text(
                         user?.activeTenant?.slug ?? 'taji-default',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, fontFamily: 'monospace', color: Color(0xFF1E293B)),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'monospace',
+                          color: Color(0xFF1E293B),
+                        ),
                       ),
                     ],
                   ),
@@ -621,16 +695,37 @@ class _TajiDrawerState extends State<TajiDrawer> {
             const SizedBox(height: 12),
             const Text(
               'GARANTÍAS DE NIVEL EMPRESARIAL',
-              style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Color(0xFF64748B), letterSpacing: 0.5),
+              style: TextStyle(
+                fontSize: 9.5,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF64748B),
+                letterSpacing: 0.5,
+              ),
             ),
             const SizedBox(height: 8),
-            _saasFeatureRow(Icons.lock_outline_rounded, 'Aislamiento Estricto', 'Base de datos particionada por condominio'),
+            _saasFeatureRow(
+              Icons.lock_outline_rounded,
+              'Aislamiento Estricto',
+              'Base de datos particionada por condominio',
+            ),
             const SizedBox(height: 6),
-            _saasFeatureRow(Icons.face_retouching_natural_rounded, 'IA Biométrica Facial', 'Algoritmo InsightFace 512-D en portería'),
+            _saasFeatureRow(
+              Icons.face_retouching_natural_rounded,
+              'IA Biométrica Facial',
+              'Algoritmo InsightFace 512-D en portería',
+            ),
             const SizedBox(height: 6),
-            _saasFeatureRow(Icons.speed_rounded, 'Alta Disponibilidad', 'SLA 99.9% y sincronización en tiempo real'),
+            _saasFeatureRow(
+              Icons.speed_rounded,
+              'Alta Disponibilidad',
+              'SLA 99.9% y sincronización en tiempo real',
+            ),
             const SizedBox(height: 6),
-            _saasFeatureRow(Icons.credit_card_rounded, 'Pagos Integrados', 'Suscripciones y expensas BOB / USD con Stripe'),
+            _saasFeatureRow(
+              Icons.credit_card_rounded,
+              'Pagos Integrados',
+              'Suscripciones y expensas BOB / USD con Stripe',
+            ),
           ],
         ),
         actions: [
@@ -638,9 +733,14 @@ class _TajiDrawerState extends State<TajiDrawer> {
             onPressed: () => Navigator.pop(ctx),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF0F6FFF),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            child: const Text('Entendido', style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Entendido',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
@@ -659,7 +759,11 @@ class _TajiDrawerState extends State<TajiDrawer> {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF10233C)),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF10233C),
+                ),
               ),
               Text(
                 subtitle,
@@ -703,7 +807,9 @@ class _DirectNavItem extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: isActive ? const Color(0xFF075AD7) : const Color(0xFF475569),
+              color: isActive
+                  ? const Color(0xFF075AD7)
+                  : const Color(0xFF475569),
             ),
             const SizedBox(width: 12),
             Text(
@@ -711,7 +817,9 @@ class _DirectNavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                color: isActive ? const Color(0xFF075AD7) : const Color(0xFF334155),
+                color: isActive
+                    ? const Color(0xFF075AD7)
+                    : const Color(0xFF334155),
               ),
             ),
           ],
@@ -766,7 +874,9 @@ class _PackageAccordion extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: isExpanded ? FontWeight.w700 : FontWeight.w600,
+                      fontWeight: isExpanded
+                          ? FontWeight.w700
+                          : FontWeight.w600,
                       color: const Color(0xFF1E293B),
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -774,7 +884,10 @@ class _PackageAccordion extends StatelessWidget {
                 ),
                 if (activeCount > 0) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFDBEAFE),
                       borderRadius: BorderRadius.circular(10),
@@ -814,10 +927,7 @@ class _PackageAccordion extends StatelessWidget {
                 left: BorderSide(color: Color(0xFFE2E8F0), width: 1.5),
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: items,
-            ),
+            child: Column(mainAxisSize: MainAxisSize.min, children: items),
           ),
       ],
     );
@@ -905,7 +1015,9 @@ class _DrawerSubItem extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isActive ? const Color(0xFF075AD7) : const Color(0xFF64748B),
+              color: isActive
+                  ? const Color(0xFF075AD7)
+                  : const Color(0xFF64748B),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -914,7 +1026,9 @@ class _DrawerSubItem extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                  color: isActive ? const Color(0xFF075AD7) : const Color(0xFF334155),
+                  color: isActive
+                      ? const Color(0xFF075AD7)
+                      : const Color(0xFF334155),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
