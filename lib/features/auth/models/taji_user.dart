@@ -141,6 +141,19 @@ extension TajiUserAccess on TajiUser {
       hasPermission('manage_visits') ||
       role?.slug == 'residente';
 
+  /// CU18: registrar incidencias. El backend lo permite a roles con
+  /// `report_incidents` o `manage_incidents`. Si la sesión guardada no trae la
+  /// lista de permisos, se usa el rol como respaldo (residente y
+  /// administración); `seguridad` solo con el permiso explícito.
+  bool get canReportIncidents {
+    final permissions = role?.permissions ?? const <String>[];
+    if (permissions.isNotEmpty) {
+      return hasPermission('report_incidents') ||
+          hasPermission('manage_incidents');
+    }
+    return role?.slug == 'residente' || isAdmin;
+  }
+
   bool get isAdmin => role?.slug == 'administrador' || role?.slug == 'superadmin';
 
   /// CU13 móvil: consulta y operación del turno propio del guardia.
