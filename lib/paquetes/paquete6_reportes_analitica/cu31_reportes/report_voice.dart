@@ -1,4 +1,6 @@
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 abstract class ReportVoice {
@@ -17,6 +19,7 @@ class NativeReportVoice implements ReportVoice {
   FlutterTts? _tts;
   int _listenGeneration = 0;
   int _speakGeneration = 0;
+  static const _googleVoice = MethodChannel('taji/reports_voice');
   @override
   Future<void> listen(
     void Function(String) onText,
@@ -24,18 +27,48 @@ class NativeReportVoice implements ReportVoice {
     void Function(String) onError,
   ) async {
     final generation = ++_listenGeneration;
-    final speech = _speech ??= SpeechToText();
-    final available = await speech.initialize(
-      onStatus: (status) {
-        if (generation == _listenGeneration && status != 'listening') onEnd();
-      },
-      onError: (_) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      try {
+        final text = await _googleVoice.invokeMethod<String>('listenGoogle');
         if (generation != _listenGeneration) return;
+        if (text != null && text.trim().isNotEmpty) {
+          onText(text.length > 500 ? text.substring(0, 500) : text);
+        } else {
+          onError('No se reconocieron palabras. Vuelve a dictar.');
+        }
+      } on PlatformException catch (error) {
+        if (generation == _listenGeneration) {
+          onError(error.message ?? 'No se pudo abrir el dictado de Google.');
+        }
+      } on MissingPluginException {
+        if (generation == _listenGeneration) {
+          onError(
+            'Esta instalación todavía no incluye el dictado de Google. Reinstala la app con la nueva versión; hot reload no actualiza código Android.',
+          );
+        }
+      } finally {
+        if (generation == _listenGeneration) onEnd();
+      }
+      return;
+    }
+    final speech = _speech ??= SpeechToText();
+    // initialize conserva los primeros callbacks; actualizar los listeners en cada sesión.
+    speech.statusListener = (status) {
+      if (generation == _listenGeneration &&
+          (status == 'done' || status == 'notListening')) {
         onEnd();
-        onError(
-          'No pudimos usar el micrófono. Revisa los permisos o escribe la consulta.',
-        );
-      },
+      }
+    };
+    speech.errorListener = (error) {
+      if (generation != _listenGeneration) return;
+      onEnd();
+      onError(
+        'El servicio de voz no pudo transcribir (${error.errorMsg}). Revisa permisos, conexión e idioma español.',
+      );
+    };
+    final available = await speech.initialize(
+      onStatus: speech.statusListener,
+      onError: speech.errorListener,
     );
     if (generation != _listenGeneration) return;
     if (!available) {
@@ -87,6 +120,9 @@ class NativeReportVoice implements ReportVoice {
   @override
   Future<void> stop() async {
     _listenGeneration++;
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      await _googleVoice.invokeMethod<void>('cancelGoogle');
+    }
     await _speech?.cancel();
   }
 
