@@ -316,6 +316,23 @@ class _TajiDrawerState extends State<TajiDrawer> {
 
                   const SizedBox(height: 6),
 
+                  if (user?.canUseReports == true)
+                    _PackageAccordion(
+                      id: 'paquete6',
+                      title: 'Reportes y analítica',
+                      icon: Icons.bar_chart_outlined,
+                      isExpanded: _isExpanded('paquete6'),
+                      onToggle: () => _togglePackage('paquete6'),
+                      activeCount: 1,
+                      items: [
+                        _DrawerSubItem(
+                          label: 'Reportes y consultas',
+                          icon: Icons.description_outlined,
+                          route: AppRoute.reports.path,
+                          isActive: currentLocation == AppRoute.reports.path,
+                        ),
+                      ],
+                    ),
                   // PAQUETE 5: SERVICIOS Y COMUNIDAD
                   _PackageAccordion(
                     id: 'paquete5',

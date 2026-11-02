@@ -24,6 +24,7 @@ import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
 import '../../features/incidents/incident_tracking.dart';
 import '../../features/incidents/incident_report_screen.dart';
+import '../../paquetes/paquete6_reportes_analitica/cu31_reportes/reports_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -34,6 +35,11 @@ class AppRouter {
     redirect: (_, state) => _redirect(auth, state),
     errorBuilder: (_, __) => const _RouteNotFoundScreen(),
     routes: [
+      GoRoute(
+        path: AppRoute.reports.path,
+        name: AppRoute.reports.name,
+        builder: (_, __) => const ReportsScreen(),
+      ),
       GoRoute(
         path: AppRoute.reportIncident.path,
         name: AppRoute.reportIncident.name,
@@ -152,6 +158,11 @@ class AppRouter {
 
   static String? _redirect(AuthController auth, GoRouterState state) {
     final location = state.matchedLocation;
+    if (auth.status == AuthStatus.authenticated &&
+        location == AppRoute.reports.path &&
+        auth.user?.canUseReports != true) {
+      return AppRoute.home.path;
+    }
     if (auth.status == AuthStatus.initializing) {
       return location == AppRoute.splash.path ? null : AppRoute.splash.path;
     }
@@ -196,6 +207,7 @@ class AppRouter {
 
   /// Rutas accesibles con sesión iniciada.
   static const _authenticatedRoutes = [
+    AppRoute.reports,
     AppRoute.reportIncident,
     AppRoute.incidents,
     AppRoute.home,

@@ -126,6 +126,17 @@ class TajiUser {
 /// solo evitan mostrar una acción que el servidor va a rechazar; nunca
 /// sustituyen la validación del servidor.
 extension TajiUserAccess on TajiUser {
+  /// CU31: mismos roles admitidos por CanAccessReports del backend.
+  bool get canUseReports =>
+      isSuperuser ||
+      const {
+        'admin',
+        'administrador',
+        'superadmin',
+        'seguridad',
+        'operador',
+      }.contains(role?.slug.toLowerCase());
+
   bool get canReportIncidents =>
       isSuperuser ||
       hasPermission('report_incidents') ||

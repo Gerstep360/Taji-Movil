@@ -27,6 +27,10 @@
 	<!-- CU10 / RF-10 (T106): permiso de cámara para el lector de QR de portería. -->
 	<key>NSCameraUsageDescription</key>
 	<string>Taji usa la cámara para escanear el código QR temporal de una visita y verificar su vigencia antes de permitir el ingreso.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Taji solicita el micrófono solo al dictar una consulta de reportes. Puedes escribirla sin usar el micrófono.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Taji convierte tu consulta hablada en texto mediante el servicio de voz del dispositivo.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -6,6 +6,7 @@ enum AppRoute {
   home('/inicio'),
   incidents('/incidencias'),
   reportIncident('/reportar-incidencia'),
+  reports('/reportes'),
   accessEvents('/control-accesos'),
   newAccessEvent('/control-accesos/nuevo'),
   securityShifts('/mis-turnos'),

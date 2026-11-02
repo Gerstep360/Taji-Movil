@@ -2,6 +2,7 @@ class ApiEndpoints {
   ApiEndpoints._();
 
   static const health = '/health/';
+  static const reports = '/cu31/';
   static const incidents = '/paquete3/incidents/';
   static String incidentAIFor(String code) =>
       '$incidents${Uri.encodeComponent(code)}/ai/';

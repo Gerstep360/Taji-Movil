@@ -45,6 +45,9 @@ dependencies:
   # Compatible con la configuracion actual de Android (AGP 8 / compileSdk 36).
   permission_handler: 12.0.3
   image_picker: ^1.2.1
+  speech_to_text: 7.3.0
+  flutter_tts: 4.2.3
+  share_plus: 11.1.0
 
 dev_dependencies:
   flutter_test:

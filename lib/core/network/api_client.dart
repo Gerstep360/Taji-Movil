@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
 import '../config/api_config.dart';
@@ -36,6 +37,15 @@ class ApiClient {
   Future<T?> put<T>(String path, {Object? data}) async {
     final response = await dio.put<T>(path, data: data);
     return response.data;
+  }
+
+  Future<Uint8List> postBytes(String path, {Object? data}) async {
+    final response = await dio.post<List<int>>(
+      path,
+      data: data,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return Uint8List.fromList(response.data ?? const []);
   }
 
   Future<T?> patch<T>(String path, {Object? data}) async {
