@@ -277,23 +277,16 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.inventory_2_outlined,
                     isExpanded: _isExpanded('paquete4'),
                     onToggle: () => _togglePackage('paquete4'),
-                    activeCount: 0,
-                    items: const [
-                      _DrawerSubItem(
-                        label: 'Inventario de Activos',
-                        icon: Icons.inventory_2_outlined,
-                        isAvailable: false,
-                      ),
-                      _DrawerSubItem(
-                        label: 'Identificación QR',
-                        icon: Icons.qr_code_outlined,
-                        isAvailable: false,
-                      ),
-                      _DrawerSubItem(
-                        label: 'Órdenes de Trabajo',
-                        icon: Icons.build_outlined,
-                        isAvailable: false,
-                      ),
+                    activeCount: user?.canAccessMaintenance == true ? 1 : 0,
+                    items: [
+                      if (user?.canAccessMaintenance == true)
+                        _DrawerSubItem(
+                          label: 'Órdenes de Trabajo (CU25)',
+                          icon: Icons.build_outlined,
+                          route: AppRoute.maintenanceOrders.path,
+                          isActive: currentLocation == AppRoute.maintenanceOrders.path,
+                          isAvailable: true,
+                        ),
                     ],
                   ),
 

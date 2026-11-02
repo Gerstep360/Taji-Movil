@@ -7,6 +7,9 @@ import '../../features/auth/screens/home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/maintenance/data/maintenance_order_repository.dart';
+import '../../features/maintenance/screens/maintenance_orders_screen.dart';
+import '../../features/maintenance/state/maintenance_orders_controller.dart';
 import '../../features/auth/models/taji_user.dart';
 import '../../features/security/screens/security_shifts_screen.dart';
 import '../../features/security/screens/access_events_screen.dart';
@@ -133,6 +136,16 @@ class AppRouter {
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
       ),
+      GoRoute(
+        path: AppRoute.maintenanceOrders.path,
+        name: AppRoute.maintenanceOrders.name,
+        builder: (context, __) => ChangeNotifierProvider(
+          create: (_) => MaintenanceOrdersController(
+            context.read<MaintenanceOrderDataSource>(),
+          ),
+          child: const MaintenanceOrdersScreen(),
+        ),
+      ),
     ],
   );
 
@@ -170,6 +183,10 @@ class AppRouter {
         auth.user?.canRegisterAccessEvents != true) {
       return AppRoute.home.path;
     }
+    if (location == AppRoute.maintenanceOrders.path &&
+        auth.user?.canAccessMaintenance != true) {
+      return AppRoute.home.path;
+    }
     return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
   }
 
@@ -187,6 +204,7 @@ class AppRouter {
     AppRoute.qrScanHistory,
     AppRoute.visitQr,
     AppRoute.visitConsultation,
+    AppRoute.maintenanceOrders,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>

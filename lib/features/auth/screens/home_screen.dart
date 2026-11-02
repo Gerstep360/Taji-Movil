@@ -120,6 +120,18 @@ class HomeScreen extends StatelessWidget {
                   onTap: () => context.push(AppRoute.accessEvents.path),
                 ),
               ),
+            if (user.canAccessMaintenance)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _ActionCard(
+                  icon: Icons.handyman_outlined,
+                  iconColor: TajiColors.primary,
+                  iconBackground: TajiColors.primarySoft,
+                  title: 'Órdenes de trabajo (CU25)',
+                  subtitle: 'Consulta tus órdenes y registra el avance del trabajo',
+                  onTap: () => context.push(AppRoute.maintenanceOrders.path),
+                ),
+              ),
             if (['manage_visits', 'register_visits', 'validate_visits', 'register_entry_exit'].any(user.hasPermission))
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
