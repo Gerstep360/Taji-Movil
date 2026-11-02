@@ -12,6 +12,8 @@ import 'core/router/app_router.dart';
 import 'core/theme/taji_theme.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/state/auth_controller.dart';
+import 'features/incidents/data/evidence_picker.dart';
+import 'features/incidents/data/incident_repository.dart';
 import 'features/security/data/security_shift_repository.dart';
 import 'features/security/data/access_event_repository.dart';
 import 'features/security/data/shift_log_repository.dart';
@@ -58,6 +60,8 @@ Future<void> bootstrap() async {
         Provider<AccessEventDataSource>(
           create: (_) => AccessEventRepository(api),
         ),
+        Provider<IncidentDataSource>(create: (_) => IncidentRepository(api)),
+        Provider<EvidencePicker>(create: (_) => ImagePickerEvidencePicker()),
         Provider<AuthRepository>.value(value: repository),
         Provider<VisitorAuthorizationRepository>.value(
           value: visitorRepository,

@@ -27,6 +27,9 @@
 	<!-- CU10 / RF-10 (T106): permiso de cámara para el lector de QR de portería. -->
 	<key>NSCameraUsageDescription</key>
 	<string>Taji usa la cámara para escanear el código QR temporal de una visita y verificar su vigencia antes de permitir el ingreso.</string>
+	<!-- CU18 / T115: elegir fotos de la galería como evidencia de una incidencia. -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Taji usa tus fotos para adjuntarlas como evidencia al reportar una incidencia.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

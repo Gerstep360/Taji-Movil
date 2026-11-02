@@ -8,6 +8,9 @@ import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
 import '../../features/auth/models/taji_user.dart';
+import '../../features/incidents/data/evidence_picker.dart';
+import '../../features/incidents/data/incident_repository.dart';
+import '../../features/incidents/screens/incident_report_screen.dart';
 import '../../features/security/screens/security_shifts_screen.dart';
 import '../../features/security/screens/access_events_screen.dart';
 import '../../features/security/data/access_event_repository.dart';
@@ -133,6 +136,14 @@ class AppRouter {
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
       ),
+      GoRoute(
+        path: AppRoute.reportIncident.path,
+        name: AppRoute.reportIncident.name,
+        builder: (context, _) => IncidentReportScreen(
+          source: context.read<IncidentDataSource>(),
+          picker: context.read<EvidencePicker>(),
+        ),
+      ),
     ],
   );
 
@@ -170,6 +181,11 @@ class AppRouter {
         auth.user?.canRegisterAccessEvents != true) {
       return AppRoute.home.path;
     }
+    // CU18: el backend responde 403 sin `report_incidents`/`manage_incidents`.
+    if (location == AppRoute.reportIncident.path &&
+        auth.user?.canReportIncidents != true) {
+      return AppRoute.home.path;
+    }
     return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
   }
 
@@ -187,6 +203,7 @@ class AppRouter {
     AppRoute.qrScanHistory,
     AppRoute.visitQr,
     AppRoute.visitConsultation,
+    AppRoute.reportIncident,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>

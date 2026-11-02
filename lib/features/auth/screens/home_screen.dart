@@ -247,6 +247,17 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
             ],
+            if (user.canReportIncidents) ...[
+              _ActionCard(
+                icon: Icons.report_problem_outlined,
+                iconColor: const Color(0xFFB45309),
+                iconBackground: const Color(0xFFFFF7ED),
+                title: 'Reportar incidencia (CU18)',
+                subtitle: 'Cuenta qué pasó y adjunta fotos como evidencia',
+                onTap: () => context.push(AppRoute.reportIncident.path),
+              ),
+              const SizedBox(height: 10),
+            ],
             _ActionCard(
               icon: Icons.qr_code_2_rounded,
               iconColor: const Color(0xFF0F6FFF),
