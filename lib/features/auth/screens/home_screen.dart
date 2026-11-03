@@ -273,6 +273,15 @@ class HomeScreen extends StatelessWidget {
               subtitle: 'Captura fotográfica y cotejo biométrico en garita',
               onTap: () => context.push(AppRoute.faceVerification.path),
             ),
+            const SizedBox(height: 10),
+            _ActionCard(
+              icon: Icons.qr_code_2_rounded,
+              iconColor: const Color(0xFFD97706),
+              iconBackground: const Color(0xFFFEF3C7),
+              title: 'Escanear Activos (CU24)',
+              subtitle: 'Consulta detalles y historial de mantenimiento de activos',
+              onTap: () => context.push(AppRoute.assetQrScanner.path),
+            ),
 
             const SizedBox(height: 24),
 

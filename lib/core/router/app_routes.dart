@@ -14,7 +14,9 @@ enum AppRoute {
   visitQr('/qr-visita/:authorizationId'),
   visitQrScanner('/escanear-qr'),
   qrScanHistory('/bitacora-escaneos'),
-  visitConsultation('/visitas-dentro');
+  visitConsultation('/visitas-dentro'),
+  assetQrScanner('/escanear-qr-activos'),
+  assetDetail('/detalle-activo/:assetId');
 
   const AppRoute(this.path);
   final String path;
@@ -22,4 +24,8 @@ enum AppRoute {
   /// Ruta concreta de la pantalla de QR para una autorización dada.
   static String visitQrFor(int authorizationId) =>
       '/qr-visita/$authorizationId';
+
+  /// Ruta concreta de la pantalla de detalle de activo.
+  static String assetDetailFor(int assetId) =>
+      '/detalle-activo/$assetId';
 }

@@ -14,6 +14,7 @@ class ApiEndpoints {
   static const visitQr = _VisitQrEndpoints();
   static const units = _UnitEndpoints();
   static const residents = _ResidentEndpoints();
+  static const assets = _AssetEndpoints();
   static const publicCondominiums = '/saas/condominiums/public/';
 }
 
@@ -91,6 +92,13 @@ class _VisitQrEndpoints {
 
   /// Guardias con actividad de escaneo, para filtrar la bitácora.
   final String scanGuards = '/security/visit-qr/scans/guards/';
+}
+
+class _AssetEndpoints {
+  const _AssetEndpoints();
+
+  final String scan = '/assets/scan/';
+  String history(int assetId) => '/assets/$assetId/history/';
 }
 
 class _AuthEndpoints {

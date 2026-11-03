@@ -19,6 +19,8 @@ import 'features/security/data/handover_repository.dart';
 import 'features/visitors/data/qr_scan_history_repository.dart';
 import 'features/visitors/data/visit_qr_repository.dart';
 import 'features/visitors/data/visitor_authorization_repository.dart';
+import 'features/assets/repositories/asset_repository.dart';
+import 'features/assets/state/asset_controller.dart';
 import 'shared/widgets/taji_logo.dart';
 
 Future<void> bootstrap() async {
@@ -65,6 +67,12 @@ Future<void> bootstrap() async {
         Provider<VisitQrDataSource>.value(value: visitQrRepository),
         Provider<QrScanHistoryDataSource>(
           create: (_) => QrScanHistoryDataSource(api),
+        ),
+        Provider<AssetRepository>(create: (_) => AssetRepository(api)),
+        ChangeNotifierProvider<AssetController>(
+          create: (context) => AssetController(
+            context.read<AssetRepository>(),
+          ),
         ),
         ChangeNotifierProvider<AuthController>.value(value: auth),
       ],
