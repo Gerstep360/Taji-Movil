@@ -16,7 +16,8 @@ enum AppRoute {
   qrScanHistory('/bitacora-escaneos'),
   visitConsultation('/visitas-dentro'),
   assetQrScanner('/escanear-qr-activos'),
-  assetDetail('/detalle-activo/:assetId');
+  assetDetail('/detalle-activo/:assetId'),
+  maintenanceOrders('/ordenes-trabajo');
 
   const AppRoute(this.path);
   final String path;

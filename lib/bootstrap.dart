@@ -16,6 +16,7 @@ import 'features/security/data/security_shift_repository.dart';
 import 'features/security/data/access_event_repository.dart';
 import 'features/security/data/shift_log_repository.dart';
 import 'features/security/data/handover_repository.dart';
+import 'features/maintenance/data/maintenance_order_repository.dart';
 import 'features/visitors/data/qr_scan_history_repository.dart';
 import 'features/visitors/data/visit_qr_repository.dart';
 import 'features/visitors/data/visitor_authorization_repository.dart';
@@ -59,6 +60,9 @@ Future<void> bootstrap() async {
         ),
         Provider<AccessEventDataSource>(
           create: (_) => AccessEventRepository(api),
+        ),
+        Provider<MaintenanceOrderDataSource>(
+          create: (_) => MaintenanceOrderRepository(api),
         ),
         Provider<AuthRepository>.value(value: repository),
         Provider<VisitorAuthorizationRepository>.value(
