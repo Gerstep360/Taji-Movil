@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../../core/router/app_routes.dart';
 import '../state/asset_controller.dart';
 
 class AssetDetailScreen extends StatelessWidget {
@@ -67,16 +68,30 @@ class AssetDetailScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.history),
-                    label: const Text('Ver Historial'),
-                    onPressed: () {
-                      controller.fetchAssetHistory(assetId);
-                      context.push('/detalle-activo/$assetId/historial');
-                    },
-                  ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.history),
+                        label: const Text('Ver Historial'),
+                        onPressed: () {
+                          controller.fetchAssetHistory(assetId);
+                          context.push(AppRoute.assetDetailFor(assetId) + '/historial');
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.qr_code_scanner),
+                        label: const Text('Escanear Otro'),
+                        onPressed: () {
+                          controller.reset();
+                          context.go(AppRoute.assetQrScanner.path);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

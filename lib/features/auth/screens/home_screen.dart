@@ -286,14 +286,18 @@ class HomeScreen extends StatelessWidget {
               onTap: () => context.push(AppRoute.faceVerification.path),
             ),
             const SizedBox(height: 10),
-            _ActionCard(
-              icon: Icons.qr_code_2_rounded,
-              iconColor: const Color(0xFFD97706),
-              iconBackground: const Color(0xFFFEF3C7),
-              title: 'Escanear Activos (CU24)',
-              subtitle: 'Consulta detalles y historial de mantenimiento de activos',
-              onTap: () => context.push(AppRoute.assetQrScanner.path),
-            ),
+            if (user.canAccessAssets)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _ActionCard(
+                  icon: Icons.qr_code_2_rounded,
+                  iconColor: const Color(0xFFD97706),
+                  iconBackground: const Color(0xFFFEF3C7),
+                  title: 'Escanear Activos (CU24)',
+                  subtitle: 'Consulta detalles y historial de mantenimiento de activos',
+                  onTap: () => context.push(AppRoute.assetQrScanner.path),
+                ),
+              ),
 
             const SizedBox(height: 24),
 
