@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../features/assets/assets_screen.dart';
+import '../../features/management/module_catalog.dart';
+import '../../features/management/module_screen.dart';
 import '../../features/maintenance/data/maintenance_order_repository.dart';
 import '../../features/maintenance/state/maintenance_orders_controller.dart';
 import '../../features/maintenance/screens/maintenance_orders_screen.dart';
@@ -39,6 +41,29 @@ class AppRouter {
     redirect: (_, state) => _redirect(auth, state),
     errorBuilder: (_, __) => const _RouteNotFoundScreen(),
     routes: [
+      GoRoute(
+        path: AppRoute.management.path,
+        name: AppRoute.management.name,
+        builder: (context, state) {
+          final module = mobileModules[state.pathParameters['moduleKey']];
+          if (module == null) return const _RouteNotFoundScreen();
+          final user = context.watch<AuthController>().user;
+          return ModuleScreen(
+            module: module,
+            key: ValueKey(
+              '${module.key}-${user?.id}-${user?.activeTenant?.id}',
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoute.incidentAnalysis.path,
+        name: AppRoute.incidentAnalysis.name,
+        builder: (_, state) => IncidentTrackingScreen(
+          initialCode: state.uri.queryParameters['codigo'],
+          analysisOnly: true,
+        ),
+      ),
       GoRoute(
         path: AppRoute.assets.path,
         name: AppRoute.assets.name,
@@ -195,6 +220,13 @@ class AppRouter {
   static String? _redirect(AuthController auth, GoRouterState state) {
     final location = state.matchedLocation;
     if (auth.status == AuthStatus.authenticated &&
+        location.startsWith('/gestion/')) {
+      final module = mobileModules[state.pathParameters['moduleKey']];
+      if (module == null || !canReadModule(auth.user, module)) {
+        return AppRoute.home.path;
+      }
+    }
+    if (auth.status == AuthStatus.authenticated &&
         [AppRoute.assets.path, AppRoute.assetQr.path].contains(location) &&
         auth.user?.canViewAssets != true) {
       return AppRoute.home.path;
@@ -256,6 +288,8 @@ class AppRouter {
     AppRoute.reports,
     AppRoute.maintenanceOrders,
     AppRoute.assets,
+    AppRoute.management,
+    AppRoute.incidentAnalysis,
     AppRoute.assetQr,
     AppRoute.reportIncident,
     AppRoute.incidents,

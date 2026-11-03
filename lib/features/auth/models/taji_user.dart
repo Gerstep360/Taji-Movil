@@ -153,6 +153,8 @@ extension TajiUserAccess on TajiUser {
 
   bool get canUseReports =>
       isSuperuser ||
+      hasPermission('view_reports') ||
+      hasPermission('view_reports') ||
       const {
         'admin',
         'administrador',

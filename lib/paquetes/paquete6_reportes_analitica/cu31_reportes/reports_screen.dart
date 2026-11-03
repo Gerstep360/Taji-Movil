@@ -78,6 +78,9 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
     try {
       final c = await widget.repository.catalog();
       if (!mounted) return;
+      if (c.formats.isEmpty || c.sources.isEmpty) {
+        throw StateError('El servidor todavía no tiene fuentes de reportes disponibles para este condominio.');
+      }
       setState(() {
         catalog = c;
         format = c.formats.contains('xlsx') ? 'xlsx' : c.formats.first;
@@ -256,12 +259,7 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
     await run(() async {
       final bytes = await widget.repository.export(q, format);
       if (!mounted) return;
-      final mime = switch (format) {
-        'xlsx' =>
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'csv' => 'text/csv',
-        _ => 'text/html',
-      };
+      final mime = reportMimeType(format);
       final name =
           'reporte-${q.source.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '')}.$format';
       final box = context.findRenderObject();
@@ -704,7 +702,9 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
                 (f) => DropdownMenuItem(
                   value: f,
                   child: Text(
-                    f == 'xlsx'
+                    f == 'pdf'
+                        ? 'PDF (.pdf)'
+                        : f == 'xlsx'
                         ? 'Excel (.xlsx)'
                         : f == 'csv'
                         ? 'CSV (.csv)'

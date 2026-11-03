@@ -10,6 +10,8 @@ enum AppRoute {
   maintenanceOrders('/mantenimiento'),
   assets('/activos'),
   assetQr('/identificar-activo-qr'),
+  management('/gestion/:moduleKey'),
+  incidentAnalysis('/clasificacion-ia'),
   accessEvents('/control-accesos'),
   newAccessEvent('/control-accesos/nuevo'),
   securityShifts('/mis-turnos'),

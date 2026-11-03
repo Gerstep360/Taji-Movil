@@ -1,6 +1,15 @@
 Map<String, dynamic> reportMap(Object? value) =>
     value is Map ? Map<String, dynamic>.from(value) : <String, dynamic>{};
 int reportInt(Object? value) => int.tryParse('$value') ?? 0;
+String reportMimeType(String format) =>
+    const {
+      'pdf': 'application/pdf',
+      'xlsx':
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'csv': 'text/csv',
+      'html': 'text/html',
+    }[format] ??
+    'application/octet-stream';
 const reportOperatorLabels = {
   'eq': 'Es igual a',
   'ne': 'Es diferente de',

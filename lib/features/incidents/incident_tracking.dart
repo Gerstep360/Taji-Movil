@@ -79,8 +79,13 @@ class IncidentTrackingRepository {
 }
 
 class IncidentTrackingScreen extends StatefulWidget {
-  const IncidentTrackingScreen({this.initialCode, super.key});
+  const IncidentTrackingScreen({
+    this.initialCode,
+    this.analysisOnly = false,
+    super.key,
+  });
   final String? initialCode;
+  final bool analysisOnly;
   @override
   State<IncidentTrackingScreen> createState() => _IncidentTrackingScreenState();
 }
@@ -182,7 +187,7 @@ class _IncidentTrackingScreenState extends State<IncidentTrackingScreen> {
     return Scaffold(
       drawer: const TajiDrawer(),
       appBar: AppBar(
-        title: Text(item?.code ?? 'Seguimiento de incidencias'),
+        title: Text(item?.code ?? (widget.analysisOnly ? 'Clasificación con IA' : 'Seguimiento de incidencias')),
         leading: item == null
             ? null
             : IconButton(
@@ -287,6 +292,10 @@ class _IncidentTrackingScreenState extends State<IncidentTrackingScreen> {
                 child: Chip(label: Text(item.status)),
               ),
               Text(item.description),
+              if (widget.analysisOnly) ...[
+                const SizedBox(height: 24),
+                IncidentAIPanel(code: item.code),
+              ],
               const SizedBox(height: 24),
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -303,7 +312,7 @@ class _IncidentTrackingScreenState extends State<IncidentTrackingScreen> {
                 subtitle: Text(date(item.due)),
               ),
               const Divider(height: 36),
-              IncidentAIPanel(code: item.code),
+              if (!widget.analysisOnly) IncidentAIPanel(code: item.code),
               Text(
                 'Línea de tiempo',
                 style: Theme.of(context).textTheme.titleLarge,

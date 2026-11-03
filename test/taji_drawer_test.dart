@@ -110,7 +110,8 @@ void main() {
     expect(find.text('GR'), findsOneWidget);
 
     // Verify sub-items inside expanded packages
-    expect(find.text('Mi Condominio & SaaS'), findsOneWidget);
+    expect(find.text('Mi condominio'), findsOneWidget);
+    expect(find.text('Pronto'), findsNothing);
     expect(find.text('Pases QR de Visita'), findsOneWidget);
     expect(find.text('Control de accesos (CU11)'), findsOneWidget);
     expect(find.text('Turnos de seguridad'), findsOneWidget);

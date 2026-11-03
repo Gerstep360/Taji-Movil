@@ -107,41 +107,82 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.people_outline_rounded,
                     isExpanded: _isExpanded('paquete1'),
                     onToggle: () => _togglePackage('paquete1'),
-                    activeCount: 1,
+                    activeCount:
+                        1 +
+                        (user?.isSuperuser == true
+                            ? 6
+                            : [
+                                    'manage_roles',
+                                    'manage_staff',
+                                    'manage_units',
+                                    'manage_units',
+                                    'manage_residents',
+                                    'manage_residents',
+                                  ]
+                                  .where(
+                                    (code) => user?.hasPermission(code) == true,
+                                  )
+                                  .length),
                     items: [
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
                         label: 'Roles y Permisos',
                         icon: Icons.admin_panel_settings_outlined,
-                        isAvailable: false,
-                      ),
-                      const _DrawerSubItem(
-                        label: 'Personal del Condominio',
-                        icon: Icons.badge_outlined,
-                        isAvailable: false,
+                        route: '/gestion/roles',
+                        isActive: currentLocation == '/gestion/roles',
+                        isAvailable:
+                            user?.isSuperuser == true ||
+                            user?.hasPermission('manage_roles') == true,
                       ),
                       _DrawerSubItem(
-                        label: 'Mi Condominio & SaaS',
+                        label: 'Personal del Condominio',
+                        icon: Icons.badge_outlined,
+                        route: '/gestion/staff',
+                        isActive: currentLocation == '/gestion/staff',
+                        isAvailable:
+                            user?.isSuperuser == true ||
+                            user?.hasPermission('manage_staff') == true,
+                      ),
+                      _DrawerSubItem(
+                        label: 'Mi condominio',
                         icon: Icons.business_outlined,
                         isAvailable: true,
-                        onTap: () {
-                          Navigator.pop(context);
-                          _showCondominiumInfo(context, user);
-                        },
+                        route: '/gestion/condominium',
+                        isActive: currentLocation == '/gestion/condominium',
                       ),
-                      const _DrawerSubItem(
-                        label: 'Sectores y Unidades',
+                      _DrawerSubItem(
+                        label: 'Sectores del condominio',
                         icon: Icons.grid_view_outlined,
-                        isAvailable: false,
+                        route: '/gestion/sectors',
+                        isActive: currentLocation == '/gestion/sectors',
+                        isAvailable:
+                            user?.isSuperuser == true ||
+                            user?.hasPermission('manage_units') == true,
                       ),
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
+                        label: 'Unidades habitacionales',
+                        icon: Icons.apartment_outlined,
+                        route: '/gestion/units',
+                        isAvailable:
+                            user?.isSuperuser == true ||
+                            user?.hasPermission('manage_units') == true,
+                      ),
+                      _DrawerSubItem(
                         label: 'Residentes y Copropietarios',
                         icon: Icons.people_outline,
-                        isAvailable: false,
+                        route: '/gestion/residents',
+                        isActive: currentLocation == '/gestion/residents',
+                        isAvailable:
+                            user?.isSuperuser == true ||
+                            user?.hasPermission('manage_residents') == true,
                       ),
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
                         label: 'Asignación de Unidades',
                         icon: Icons.link_rounded,
-                        isAvailable: false,
+                        route: '/gestion/resident-units',
+                        isActive: currentLocation == '/gestion/resident-units',
+                        isAvailable:
+                            user?.isSuperuser == true ||
+                            user?.hasPermission('manage_residents') == true,
                       ),
                     ],
                   ),
@@ -234,10 +275,15 @@ class _TajiDrawerState extends State<TajiDrawer> {
                           isActive: currentLocation == AppRoute.handovers.path,
                           isAvailable: true,
                         ),
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
                         label: 'Auditoría y Bitácora',
                         icon: Icons.description_outlined,
-                        isAvailable: false,
+                        route: '/gestion/audit',
+                        isActive: currentLocation == '/gestion/audit',
+                        isAvailable:
+                            user?.isSuperuser == true ||
+                            user?.hasPermission('view_audit_log') == true ||
+                            user?.hasPermission('manage_roles') == true,
                       ),
                     ],
                   ),
@@ -251,7 +297,7 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.auto_awesome_rounded,
                     isExpanded: _isExpanded('paquete3'),
                     onToggle: () => _togglePackage('paquete3'),
-                    activeCount: (user?.canReportIncidents ?? false) ? 3 : 2,
+                    activeCount: (user?.canReportIncidents ?? false) ? 4 : 3,
                     items: [
                       _DrawerSubItem(
                         label: 'Reconocimiento Facial',
@@ -277,10 +323,12 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         isActive: currentLocation == AppRoute.incidents.path,
                         isAvailable: true,
                       ),
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
                         label: 'Clasificación con IA',
                         icon: Icons.auto_awesome_outlined,
-                        isAvailable: false,
+                        route: AppRoute.incidentAnalysis.path,
+                        isActive:
+                            currentLocation == AppRoute.incidentAnalysis.path,
                       ),
                     ],
                   ),
@@ -349,27 +397,45 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.layers_outlined,
                     isExpanded: _isExpanded('paquete5'),
                     onToggle: () => _togglePackage('paquete5'),
-                    activeCount: 0,
-                    items: const [
+                    activeCount: 5 + (user?.canUseReports == true ? 1 : 0),
+                    items: [
                       _DrawerSubItem(
-                        label: 'Áreas Comunes y Reservas',
+                        label: 'Reservas de áreas',
                         icon: Icons.calendar_month_outlined,
-                        isAvailable: false,
+                        route: '/gestion/reservations',
+                        isActive: currentLocation == '/gestion/reservations',
+                        isAvailable: true,
+                      ),
+                      const _DrawerSubItem(
+                        label: 'Áreas comunes',
+                        icon: Icons.park_outlined,
+                        route: '/gestion/areas',
                       ),
                       _DrawerSubItem(
                         label: 'Comunicados y Avisos',
                         icon: Icons.campaign_outlined,
-                        isAvailable: false,
+                        route: '/gestion/announcements',
+                        isActive: currentLocation == '/gestion/announcements',
+                        isAvailable: true,
                       ),
                       _DrawerSubItem(
-                        label: 'Asambleas y Acuerdos',
+                        label: 'Asambleas',
                         icon: Icons.account_balance_outlined,
-                        isAvailable: false,
+                        route: '/gestion/assemblies',
+                        isActive: currentLocation == '/gestion/assemblies',
+                        isAvailable: true,
+                      ),
+                      const _DrawerSubItem(
+                        label: 'Acuerdos',
+                        icon: Icons.task_alt_outlined,
+                        route: '/gestion/agreements',
                       ),
                       _DrawerSubItem(
                         label: 'Dashboard y Reportes',
                         icon: Icons.bar_chart_outlined,
-                        isAvailable: false,
+                        route: AppRoute.reports.path,
+                        isActive: currentLocation == AppRoute.reports.path,
+                        isAvailable: user?.canUseReports == true,
                       ),
                     ],
                   ),
@@ -967,7 +1033,6 @@ class _DrawerSubItem extends StatelessWidget {
     this.route,
     this.isActive = false,
     this.isAvailable = true,
-    this.onTap,
   });
 
   final String label;
@@ -975,7 +1040,6 @@ class _DrawerSubItem extends StatelessWidget {
   final String? route;
   final bool isActive;
   final bool isAvailable;
-  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -1005,7 +1069,7 @@ class _DrawerSubItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Text(
-                'Pronto',
+                'Sin permiso',
                 style: TextStyle(
                   fontSize: 8.5,
                   fontWeight: FontWeight.w700,
@@ -1020,9 +1084,7 @@ class _DrawerSubItem extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        if (onTap != null) {
-          onTap!();
-        } else if (route != null) {
+        if (route != null) {
           Navigator.pop(context);
           context.push(route!);
         }
