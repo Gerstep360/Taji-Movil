@@ -1,6 +1,8 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
+  static const assets = _AssetEndpoints();
+  static const maintenance = _MaintenanceEndpoints();
   static const health = '/health/';
   static const reports = '/cu31/';
   static const incidents = '/paquete3/incidents/';
@@ -19,6 +21,21 @@ class ApiEndpoints {
   static const units = _UnitEndpoints();
   static const residents = _ResidentEndpoints();
   static const publicCondominiums = '/saas/condominiums/public/';
+}
+
+class _AssetEndpoints {
+  const _AssetEndpoints();
+  final String collection = '/assets/';
+  final String scan = '/assets/scan/';
+  String history(int id) => '/assets/$id/history/';
+}
+
+class _MaintenanceEndpoints {
+  const _MaintenanceEndpoints();
+  final String orders = '/maintenance/orders/';
+  String order(int id) => '/maintenance/orders/$id/';
+  String status(int id) => '/maintenance/orders/$id/status/';
+  String attachments(int id) => '/maintenance/orders/$id/attachments/';
 }
 
 class _SecurityShiftEndpoints {

@@ -52,23 +52,13 @@ class _FakeAuthController extends ChangeNotifier implements AuthController {
   Future<void> logout() async {}
 
   @override
-  Future<bool> register({
-    required String email,
-    required String password,
-    required String firstName,
-    required String lastName,
-    required String phone,
-  }) async => true;
-
-  @override
   void clearError() {}
-
-  @override
-  Future<bool> requestPasswordReset(String email) async => true;
 }
 
 void main() {
-  testWidgets('TajiDrawer renders web-style sidebar packages and tenant pill', (tester) async {
+  testWidgets('TajiDrawer renders web-style sidebar packages and tenant pill', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 4500);
     tester.view.devicePixelRatio = 3.0;
     addTearDown(tester.view.reset);
@@ -89,9 +79,7 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider<AuthController>(
         create: (_) => _FakeAuthController(),
-        child: MaterialApp.router(
-          routerConfig: router,
-        ),
+        child: MaterialApp.router(routerConfig: router),
       ),
     );
 

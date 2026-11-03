@@ -358,7 +358,7 @@ void main() {
     expect(find.text('Carlos Visitante'), findsOneWidget);
     expect(find.text('Carnet: 7654321'), findsOneWidget);
     expect(find.text('Destino: C-04 · Los Pinos'), findsOneWidget);
-    expect(find.text('Denegado'), findsOneWidget);
+    expect(find.descendant(of: find.byType(Card), matching: find.text('Denegado')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../features/assets/assets_screen.dart';
+import '../../features/maintenance/data/maintenance_order_repository.dart';
+import '../../features/maintenance/state/maintenance_orders_controller.dart';
+import '../../features/maintenance/screens/maintenance_orders_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -35,6 +39,38 @@ class AppRouter {
     redirect: (_, state) => _redirect(auth, state),
     errorBuilder: (_, __) => const _RouteNotFoundScreen(),
     routes: [
+      GoRoute(
+        path: AppRoute.assets.path,
+        name: AppRoute.assets.name,
+        builder: (context, __) => AssetsScreen(
+          key: ValueKey(
+            'assets-${context.watch<AuthController>().user?.id}-${context.watch<AuthController>().user?.activeTenant?.id}',
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.assetQr.path,
+        name: AppRoute.assetQr.name,
+        builder: (context, __) => AssetsScreen(
+          scanOnly: true,
+          key: ValueKey(
+            'asset-qr-${context.watch<AuthController>().user?.id}-${context.watch<AuthController>().user?.activeTenant?.id}',
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.maintenanceOrders.path,
+        name: AppRoute.maintenanceOrders.name,
+        builder: (context, __) => ChangeNotifierProvider(
+          key: ValueKey(
+            'maintenance-${context.watch<AuthController>().user?.id}-${context.watch<AuthController>().user?.activeTenant?.id}',
+          ),
+          create: (_) => MaintenanceOrdersController(
+            context.read<MaintenanceOrderDataSource>(),
+          ),
+          child: const MaintenanceOrdersScreen(),
+        ),
+      ),
       GoRoute(
         path: AppRoute.reports.path,
         name: AppRoute.reports.name,
@@ -159,6 +195,16 @@ class AppRouter {
   static String? _redirect(AuthController auth, GoRouterState state) {
     final location = state.matchedLocation;
     if (auth.status == AuthStatus.authenticated &&
+        [AppRoute.assets.path, AppRoute.assetQr.path].contains(location) &&
+        auth.user?.canViewAssets != true) {
+      return AppRoute.home.path;
+    }
+    if (auth.status == AuthStatus.authenticated &&
+        location == AppRoute.maintenanceOrders.path &&
+        auth.user?.canAccessMaintenance != true) {
+      return AppRoute.home.path;
+    }
+    if (auth.status == AuthStatus.authenticated &&
         location == AppRoute.reports.path &&
         auth.user?.canUseReports != true) {
       return AppRoute.home.path;
@@ -208,6 +254,9 @@ class AppRouter {
   /// Rutas accesibles con sesión iniciada.
   static const _authenticatedRoutes = [
     AppRoute.reports,
+    AppRoute.maintenanceOrders,
+    AppRoute.assets,
+    AppRoute.assetQr,
     AppRoute.reportIncident,
     AppRoute.incidents,
     AppRoute.home,

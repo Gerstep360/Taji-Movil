@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
+import 'features/maintenance/data/maintenance_order_repository.dart';
 import 'core/config/api_config.dart';
 import 'core/network/api_client.dart';
 import 'core/network/token_store.dart';
@@ -50,6 +51,9 @@ Future<void> bootstrap() async {
     MultiProvider(
       providers: [
         Provider<ApiClient>.value(value: api),
+        Provider<MaintenanceOrderDataSource>(
+          create: (_) => MaintenanceOrderRepository(api),
+        ),
         Provider<HandoverDataSource>(create: (_) => HandoverRepository(api)),
         Provider<ShiftLogDataSource>(create: (_) => ShiftLogRepository(api)),
         Provider<SecurityShiftDataSource>(

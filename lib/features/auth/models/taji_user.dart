@@ -127,6 +127,30 @@ class TajiUser {
 /// sustituyen la validación del servidor.
 extension TajiUserAccess on TajiUser {
   /// CU31: mismos roles admitidos por CanAccessReports del backend.
+  bool get canManageMaintenance =>
+      isSuperuser || hasPermission('manage_maintenance');
+  bool get canUpdateMaintenanceOrders =>
+      canManageMaintenance || hasPermission('update_work_order_status');
+  bool get canAttachWorkEvidence =>
+      canManageMaintenance || hasPermission('attach_work_evidence');
+  bool get canAccessMaintenance =>
+      canManageMaintenance ||
+      const [
+        'view_assigned_work_orders',
+        'update_work_order_status',
+        'attach_work_evidence',
+        'maintain_assets',
+        'access_assigned_external_orders',
+      ].any(hasPermission);
+  bool get canViewAssets =>
+      isSuperuser ||
+      const [
+        'manage_assets',
+        'manage_maintenance',
+        'view_general_status',
+        'maintain_assets',
+      ].any(hasPermission);
+
   bool get canUseReports =>
       isSuperuser ||
       const {
