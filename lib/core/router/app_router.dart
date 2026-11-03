@@ -7,6 +7,9 @@ import '../../features/auth/screens/home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/maintenance/data/maintenance_order_repository.dart';
+import '../../features/maintenance/screens/maintenance_orders_screen.dart';
+import '../../features/maintenance/state/maintenance_orders_controller.dart';
 import '../../features/auth/models/taji_user.dart';
 import '../../features/security/screens/security_shifts_screen.dart';
 import '../../features/security/screens/access_events_screen.dart';
@@ -20,6 +23,9 @@ import '../../features/visitors/screens/visit_consultation_screen.dart';
 import '../../features/visitors/screens/visit_qr_scanner_screen.dart';
 import '../../features/visitors/screens/visit_qr_screen.dart';
 import '../../features/visitors/screens/visitor_authorizations_screen.dart';
+import '../../features/assets/screens/asset_qr_scanner_screen.dart';
+import '../../features/assets/screens/asset_detail_screen.dart';
+import '../../features/assets/screens/asset_history_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
 
@@ -133,6 +139,45 @@ class AppRouter {
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
       ),
+      GoRoute(
+        path: AppRoute.assetQrScanner.path,
+        name: AppRoute.assetQrScanner.name,
+        builder: (_, __) => const AssetQRScannerScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.assetDetail.path,
+        name: AppRoute.assetDetail.name,
+        builder: (_, state) {
+          final id = int.tryParse(
+            state.pathParameters['assetId'] ?? '',
+          );
+          if (id == null || id <= 0) return const _RouteNotFoundScreen();
+          return AssetDetailScreen(assetId: id);
+        },
+        routes: [
+          GoRoute(
+            path: 'historial',
+            name: 'assetHistory',
+            builder: (_, state) {
+              final id = int.tryParse(
+                state.pathParameters['assetId'] ?? '',
+              );
+              if (id == null || id <= 0) return const _RouteNotFoundScreen();
+              return AssetHistoryScreen(assetId: id);
+            },
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoute.maintenanceOrders.path,
+        name: AppRoute.maintenanceOrders.name,
+        builder: (context, __) => ChangeNotifierProvider(
+          create: (_) => MaintenanceOrdersController(
+            context.read<MaintenanceOrderDataSource>(),
+          ),
+          child: const MaintenanceOrdersScreen(),
+        ),
+      ),
     ],
   );
 
@@ -170,6 +215,10 @@ class AppRouter {
         auth.user?.canRegisterAccessEvents != true) {
       return AppRoute.home.path;
     }
+    if (location == AppRoute.maintenanceOrders.path &&
+        auth.user?.canAccessMaintenance != true) {
+      return AppRoute.home.path;
+    }
     return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
   }
 
@@ -187,6 +236,9 @@ class AppRouter {
     AppRoute.qrScanHistory,
     AppRoute.visitQr,
     AppRoute.visitConsultation,
+    AppRoute.assetQrScanner,
+    AppRoute.assetDetail,
+    AppRoute.maintenanceOrders,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>

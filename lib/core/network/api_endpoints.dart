@@ -14,7 +14,18 @@ class ApiEndpoints {
   static const visitQr = _VisitQrEndpoints();
   static const units = _UnitEndpoints();
   static const residents = _ResidentEndpoints();
+  static const assets = _AssetEndpoints();
   static const publicCondominiums = '/saas/condominiums/public/';
+  static const maintenance = _MaintenanceEndpoints();
+}
+
+class _MaintenanceEndpoints {
+  const _MaintenanceEndpoints();
+
+  final String orders = '/maintenance/orders/';
+  String order(int id) => '/maintenance/orders/$id/';
+  String status(int id) => '/maintenance/orders/$id/status/';
+  String attachments(int id) => '/maintenance/orders/$id/attachments/';
 }
 
 class _SecurityShiftEndpoints {
@@ -91,6 +102,13 @@ class _VisitQrEndpoints {
 
   /// Guardias con actividad de escaneo, para filtrar la bitácora.
   final String scanGuards = '/security/visit-qr/scans/guards/';
+}
+
+class _AssetEndpoints {
+  const _AssetEndpoints();
+
+  final String scan = '/assets/scan/';
+  String history(int assetId) => '/assets/$assetId/history/';
 }
 
 class _AuthEndpoints {

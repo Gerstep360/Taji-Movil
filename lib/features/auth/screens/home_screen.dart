@@ -120,6 +120,18 @@ class HomeScreen extends StatelessWidget {
                   onTap: () => context.push(AppRoute.accessEvents.path),
                 ),
               ),
+            if (user.canAccessMaintenance)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _ActionCard(
+                  icon: Icons.handyman_outlined,
+                  iconColor: TajiColors.primary,
+                  iconBackground: TajiColors.primarySoft,
+                  title: 'Órdenes de trabajo (CU25)',
+                  subtitle: 'Consulta tus órdenes y registra el avance del trabajo',
+                  onTap: () => context.push(AppRoute.maintenanceOrders.path),
+                ),
+              ),
             if (['manage_visits', 'register_visits', 'validate_visits', 'register_entry_exit'].any(user.hasPermission))
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
@@ -273,6 +285,19 @@ class HomeScreen extends StatelessWidget {
               subtitle: 'Captura fotográfica y cotejo biométrico en garita',
               onTap: () => context.push(AppRoute.faceVerification.path),
             ),
+            const SizedBox(height: 10),
+            if (user.canAccessAssets)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _ActionCard(
+                  icon: Icons.qr_code_2_rounded,
+                  iconColor: const Color(0xFFD97706),
+                  iconBackground: const Color(0xFFFEF3C7),
+                  title: 'Escanear Activos (CU24)',
+                  subtitle: 'Consulta detalles y historial de mantenimiento de activos',
+                  onTap: () => context.push(AppRoute.assetQrScanner.path),
+                ),
+              ),
 
             const SizedBox(height: 24),
 
