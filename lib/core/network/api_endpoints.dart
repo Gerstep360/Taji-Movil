@@ -20,6 +20,7 @@ class ApiEndpoints {
   static const visitQr = _VisitQrEndpoints();
   static const units = _UnitEndpoints();
   static const residents = _ResidentEndpoints();
+  static const community = _CommunityEndpoints();
   static const publicCondominiums = '/saas/condominiums/public/';
 }
 
@@ -28,6 +29,14 @@ class _AssetEndpoints {
   final String collection = '/assets/';
   final String scan = '/assets/scan/';
   String history(int id) => '/assets/$id/history/';
+}
+
+/// CU26 / T121: consulta de áreas comunes y disponibilidad.
+class _CommunityEndpoints {
+  const _CommunityEndpoints();
+  final String areas = '/community/areas/';
+  final String areaSchedules = '/community/area-schedules/';
+  final String areaBlocks = '/community/area-blocks/';
 }
 
 class _MaintenanceEndpoints {

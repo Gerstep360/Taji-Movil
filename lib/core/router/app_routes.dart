@@ -22,7 +22,9 @@ enum AppRoute {
   visitQr('/qr-visita/:authorizationId'),
   visitQrScanner('/escanear-qr'),
   qrScanHistory('/bitacora-escaneos'),
-  visitConsultation('/visitas-dentro');
+  visitConsultation('/visitas-dentro'),
+  // CU26 / T121: consulta de áreas comunes y disponibilidad.
+  communityAreas('/areas-comunes');
 
   const AppRoute(this.path);
   final String path;
