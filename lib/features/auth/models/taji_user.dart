@@ -206,4 +206,12 @@ extension TajiUserAccess on TajiUser {
       ].contains(role?.slug.toLowerCase()) ||
       hasPermission('operate_security_shifts') ||
       hasPermission('view_security_shifts');
+
+  /// CU24: Escanear y consultar activos mediante QR.
+  /// Requiere: manage_assets, view_general_status, o maintain_assets.
+  bool get canAccessAssets =>
+      isAdmin ||
+      hasPermission('manage_assets') ||
+      hasPermission('view_general_status') ||
+      hasPermission('maintain_assets');
 }

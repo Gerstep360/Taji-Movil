@@ -338,6 +338,20 @@ class HomeScreen extends StatelessWidget {
               subtitle: 'Captura fotográfica y cotejo biométrico en garita',
               onTap: () => context.push(AppRoute.faceVerification.path),
             ),
+            // CU24: tarjeta de activos, igual que en la rama de Cristel,
+            // enrutada a la pantalla consolidada de activos.
+            if (user.canViewAssets) ...[
+              const SizedBox(height: 10),
+              _ActionCard(
+                icon: Icons.qr_code_2_rounded,
+                iconColor: const Color(0xFFD97706),
+                iconBackground: const Color(0xFFFEF3C7),
+                title: 'Escanear Activos (CU24)',
+                subtitle:
+                    'Consulta detalles y el historial de mantenimiento de activos',
+                onTap: () => context.push(AppRoute.assets.path),
+              ),
+            ],
 
             const SizedBox(height: 24),
 

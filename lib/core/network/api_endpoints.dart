@@ -25,13 +25,6 @@ class ApiEndpoints {
   static const publicCondominiums = '/saas/condominiums/public/';
 }
 
-class _AssetEndpoints {
-  const _AssetEndpoints();
-  final String collection = '/assets/';
-  final String scan = '/assets/scan/';
-  String history(int id) => '/assets/$id/history/';
-}
-
 class _MaintenanceEndpoints {
   const _MaintenanceEndpoints();
   final String orders = '/maintenance/orders/';
@@ -125,6 +118,13 @@ class _VisitQrEndpoints {
 
   /// Guardias con actividad de escaneo, para filtrar la bitácora.
   final String scanGuards = '/security/visit-qr/scans/guards/';
+}
+
+class _AssetEndpoints {
+  const _AssetEndpoints();
+  final String collection = '/assets/';
+  final String scan = '/assets/scan/';
+  String history(int id) => '/assets/$id/history/';
 }
 
 class _AuthEndpoints {
