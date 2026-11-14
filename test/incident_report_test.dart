@@ -228,6 +228,13 @@ void main() {
       expect(userWith('residente', []).canReportIncidents, isTrue);
       expect(userWith('seguridad', []).canReportIncidents, isFalse);
     });
+
+    test('el superusuario real habilita el registro de incidencias', () {
+      final user = TajiUser.fromJson({'id': 1, 'is_superuser': true});
+      expect(user.canReportIncidents, isTrue);
+      expect(TajiUser.fromJson(user.toJson()).canReportIncidents, isTrue);
+      expect(TajiUser.fromJson({'id': 2}).canReportIncidents, isFalse);
+    });
   });
 
   group('CU18 repositorio', () {

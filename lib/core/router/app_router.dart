@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../features/assets/assets_screen.dart';
+import '../../features/management/module_catalog.dart';
+import '../../features/management/module_screen.dart';
+import '../../features/maintenance/data/maintenance_order_repository.dart';
+import '../../features/maintenance/state/maintenance_orders_controller.dart';
+import '../../features/maintenance/screens/maintenance_orders_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +31,8 @@ import '../../features/visitors/screens/visit_qr_screen.dart';
 import '../../features/visitors/screens/visitor_authorizations_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
+import '../../features/incidents/incident_tracking.dart';
+import '../../paquetes/paquete6_reportes_analitica/cu31_reportes/reports_screen.dart';
 
 class AppRouter {
   AppRouter._();
@@ -35,6 +43,73 @@ class AppRouter {
     redirect: (_, state) => _redirect(auth, state),
     errorBuilder: (_, __) => const _RouteNotFoundScreen(),
     routes: [
+      GoRoute(
+        path: AppRoute.management.path,
+        name: AppRoute.management.name,
+        builder: (context, state) {
+          final module = mobileModules[state.pathParameters['moduleKey']];
+          if (module == null) return const _RouteNotFoundScreen();
+          final user = context.watch<AuthController>().user;
+          return ModuleScreen(
+            module: module,
+            key: ValueKey(
+              '${module.key}-${user?.id}-${user?.activeTenant?.id}',
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoute.incidentAnalysis.path,
+        name: AppRoute.incidentAnalysis.name,
+        builder: (_, state) => IncidentTrackingScreen(
+          initialCode: state.uri.queryParameters['codigo'],
+          analysisOnly: true,
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.assets.path,
+        name: AppRoute.assets.name,
+        builder: (context, __) => AssetsScreen(
+          key: ValueKey(
+            'assets-${context.watch<AuthController>().user?.id}-${context.watch<AuthController>().user?.activeTenant?.id}',
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.assetQr.path,
+        name: AppRoute.assetQr.name,
+        builder: (context, __) => AssetsScreen(
+          scanOnly: true,
+          key: ValueKey(
+            'asset-qr-${context.watch<AuthController>().user?.id}-${context.watch<AuthController>().user?.activeTenant?.id}',
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.maintenanceOrders.path,
+        name: AppRoute.maintenanceOrders.name,
+        builder: (context, __) => ChangeNotifierProvider(
+          key: ValueKey(
+            'maintenance-${context.watch<AuthController>().user?.id}-${context.watch<AuthController>().user?.activeTenant?.id}',
+          ),
+          create: (_) => MaintenanceOrdersController(
+            context.read<MaintenanceOrderDataSource>(),
+          ),
+          child: const MaintenanceOrdersScreen(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.reports.path,
+        name: AppRoute.reports.name,
+        builder: (_, __) => const ReportsScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.incidents.path,
+        name: AppRoute.incidents.name,
+        builder: (_, state) => IncidentTrackingScreen(
+          initialCode: state.uri.queryParameters['codigo'],
+        ),
+      ),
       GoRoute(
         path: AppRoute.visitConsultation.path,
         name: AppRoute.visitConsultation.name,
@@ -149,6 +224,28 @@ class AppRouter {
 
   static String? _redirect(AuthController auth, GoRouterState state) {
     final location = state.matchedLocation;
+    if (auth.status == AuthStatus.authenticated &&
+        location.startsWith('/gestion/')) {
+      final module = mobileModules[state.pathParameters['moduleKey']];
+      if (module == null || !canReadModule(auth.user, module)) {
+        return AppRoute.home.path;
+      }
+    }
+    if (auth.status == AuthStatus.authenticated &&
+        [AppRoute.assets.path, AppRoute.assetQr.path].contains(location) &&
+        auth.user?.canViewAssets != true) {
+      return AppRoute.home.path;
+    }
+    if (auth.status == AuthStatus.authenticated &&
+        location == AppRoute.maintenanceOrders.path &&
+        auth.user?.canAccessMaintenance != true) {
+      return AppRoute.home.path;
+    }
+    if (auth.status == AuthStatus.authenticated &&
+        location == AppRoute.reports.path &&
+        auth.user?.canUseReports != true) {
+      return AppRoute.home.path;
+    }
     if (auth.status == AuthStatus.initializing) {
       return location == AppRoute.splash.path ? null : AppRoute.splash.path;
     }
@@ -177,7 +274,10 @@ class AppRouter {
         auth.user?.canValidateVisits != true) {
       return AppRoute.home.path;
     }
-    if ([AppRoute.accessEvents.path, AppRoute.newAccessEvent.path].contains(location) &&
+    if ([
+          AppRoute.accessEvents.path,
+          AppRoute.newAccessEvent.path,
+        ].contains(location) &&
         auth.user?.canRegisterAccessEvents != true) {
       return AppRoute.home.path;
     }
@@ -191,6 +291,14 @@ class AppRouter {
 
   /// Rutas accesibles con sesión iniciada.
   static const _authenticatedRoutes = [
+    AppRoute.reports,
+    AppRoute.maintenanceOrders,
+    AppRoute.assets,
+    AppRoute.management,
+    AppRoute.incidentAnalysis,
+    AppRoute.assetQr,
+    AppRoute.reportIncident,
+    AppRoute.incidents,
     AppRoute.home,
     AppRoute.accessEvents,
     AppRoute.newAccessEvent,
@@ -203,7 +311,6 @@ class AppRouter {
     AppRoute.qrScanHistory,
     AppRoute.visitQr,
     AppRoute.visitConsultation,
-    AppRoute.reportIncident,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>
