@@ -261,6 +261,16 @@ class HomeScreen extends StatelessWidget {
               onTap: () => context.push('/gestion/reservations'),
             ),
             const SizedBox(height: 10),
+            // CU26 / T121: consulta de disponibilidad de áreas comunes.
+            _ActionCard(
+              icon: Icons.park_outlined,
+              iconColor: TajiColors.primary,
+              iconBackground: TajiColors.primarySoft,
+              title: 'Áreas comunes (CU26)',
+              subtitle: 'Disponibilidad, horarios y bloqueos de los espacios',
+              onTap: () => context.push(AppRoute.communityAreas.path),
+            ),
+            const SizedBox(height: 10),
             _ActionCard(
               icon: Icons.campaign_outlined,
               iconColor: TajiColors.primary,

@@ -22,6 +22,8 @@ enum AppRoute {
   visitQrScanner('/escanear-qr'),
   qrScanHistory('/bitacora-escaneos'),
   visitConsultation('/visitas-dentro'),
+  // CU26 / T121: consulta de áreas comunes y disponibilidad.
+  communityAreas('/areas-comunes'),
   // CU18 / T114-T115: registrar una incidencia con evidencias.
   reportIncident('/incidencias/nueva');
 

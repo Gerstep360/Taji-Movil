@@ -9,6 +9,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../features/auth/screens/forgot_password_screen.dart';
+import '../../features/community/data/community_repository.dart';
+import '../../features/community/state/community_areas_controller.dart';
+import '../../features/community/screens/community_areas_screen.dart';
 import '../../features/auth/screens/home_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
@@ -96,6 +99,20 @@ class AppRouter {
             context.read<MaintenanceOrderDataSource>(),
           ),
           child: const MaintenanceOrdersScreen(),
+        ),
+      ),
+      // T121 / CU26: consulta de áreas comunes y disponibilidad.
+      GoRoute(
+        path: AppRoute.communityAreas.path,
+        name: AppRoute.communityAreas.name,
+        builder: (context, __) => ChangeNotifierProvider(
+          key: ValueKey(
+            'community-areas-${context.watch<AuthController>().user?.id}-${context.watch<AuthController>().user?.activeTenant?.id}',
+          ),
+          create: (_) => CommunityAreasController(
+            context.read<CommunityDataSource>(),
+          ),
+          child: const CommunityAreasScreen(),
         ),
       ),
       GoRoute(
@@ -300,6 +317,7 @@ class AppRouter {
     AppRoute.reportIncident,
     AppRoute.incidents,
     AppRoute.home,
+    AppRoute.communityAreas,
     AppRoute.accessEvents,
     AppRoute.newAccessEvent,
     AppRoute.securityShifts,

@@ -396,13 +396,21 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.layers_outlined,
                     isExpanded: _isExpanded('paquete5'),
                     onToggle: () => _togglePackage('paquete5'),
-                    activeCount: 5 + (user?.canUseReports == true ? 1 : 0),
+                    activeCount: 6 + (user?.canUseReports == true ? 1 : 0),
                     items: [
                       _DrawerSubItem(
                         label: 'Reservas de áreas',
                         icon: Icons.calendar_month_outlined,
                         route: '/gestion/reservations',
                         isActive: currentLocation == '/gestion/reservations',
+                        isAvailable: true,
+                      ),
+                      _DrawerSubItem(
+                        label: 'Áreas y disponibilidad',
+                        icon: Icons.park_outlined,
+                        route: AppRoute.communityAreas.path,
+                        isActive:
+                            currentLocation == AppRoute.communityAreas.path,
                         isAvailable: true,
                       ),
                       const _DrawerSubItem(
