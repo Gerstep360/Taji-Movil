@@ -8,7 +8,9 @@ plugins {
 android {
     namespace = "com.taji.taji"
     compileSdk = 36
-    ndkVersion = "27.0.12077973"
+    // Versión más alta requerida por los plugins (flutter_plugin_android_lifecycle,
+    // flutter_secure_storage, etc.); es retrocompatible.
+    ndkVersion = "28.2.13676358"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
