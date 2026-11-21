@@ -1,25 +1,17 @@
 enum AppRoute {
-  splash('/splash'),
+  splash('/'),
   login('/iniciar-sesion'),
-  register('/crear-cuenta'),
-  forgotPassword('/recuperar-contrasena'),
   home('/inicio'),
-  accessEvents('/control-accesos'),
-  newAccessEvent('/control-accesos/nuevo'),
-  securityShifts('/mis-turnos'),
-  shiftLogs('/novedades-turno'),
-  handovers('/entregas-turno'),
+  guestInvitation('/invitar-visita'),
+  securityVisits('/seguridad/visitas'),
   faceVerification('/verificacion-facial'),
-  visitorAuthorizations('/autorizaciones-visita'),
   visitQr('/qr-visita/:authorizationId'),
   visitQrScanner('/escanear-qr'),
   qrScanHistory('/bitacora-escaneos'),
-  visitConsultation('/visitas-dentro');
+  visitConsultation('/visitas-dentro'),
+  // CU28 / T123: centro de comunicados y notificaciones.
+  announcements('/comunicados');
 
   const AppRoute(this.path);
   final String path;
-
-  /// Ruta concreta de la pantalla de QR para una autorización dada.
-  static String visitQrFor(int authorizationId) =>
-      '/qr-visita/$authorizationId';
 }

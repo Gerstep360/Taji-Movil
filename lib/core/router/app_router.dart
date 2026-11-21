@@ -21,6 +21,7 @@ import '../../features/visitors/screens/visit_qr_scanner_screen.dart';
 import '../../features/visitors/screens/visit_qr_screen.dart';
 import '../../features/visitors/screens/visitor_authorizations_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
+import '../../features/announcements/screens/announcements_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -64,7 +65,7 @@ class AppRouter {
         name: AppRoute.visitorAuthorizations.name,
         builder: (_, __) => const VisitorAuthorizationsScreen(),
       ),
-      // T105 / CU09: QR temporal y vigencia de una autorizaci√≥n concreta.
+      // T105 / CU09: QR temporal y vigencia de una autorizaciÛn concreta.
       GoRoute(
         path: AppRoute.visitQr.path,
         name: AppRoute.visitQr.name,
@@ -89,7 +90,7 @@ class AppRouter {
         name: AppRoute.visitQrScanner.name,
         builder: (_, __) => const VisitQrScannerScreen(),
       ),
-      // CU10: bit√°cora de escaneos. El registro vive en el servidor, as√≠ que
+      // CU10: bit·cora de escaneos. El registro vive en el servidor, asÌ que
       // a diferencia del historial del lector sobrevive a cerrar la app.
       GoRoute(
         path: AppRoute.qrScanHistory.path,
@@ -129,6 +130,11 @@ class AppRouter {
         builder: (_, __) => const HandoversScreen(),
       ),
       GoRoute(
+        path: AppRoute.announcements.path,
+        name: AppRoute.announcements.name,
+        builder: (_, __) => const AnnouncementsScreen(),
+      ),
+      GoRoute(
         path: AppRoute.faceVerification.path,
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
@@ -161,7 +167,7 @@ class AppRouter {
         auth.user?.canUseSecurityShifts != true) {
       return AppRoute.home.path;
     }
-    // La bit√°cora de escaneos la lee el mismo permiso que valida los QR.
+    // La bit·cora de escaneos la lee el mismo permiso que valida los QR.
     if (location == AppRoute.qrScanHistory.path &&
         auth.user?.canValidateVisits != true) {
       return AppRoute.home.path;
@@ -173,7 +179,7 @@ class AppRouter {
     return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
   }
 
-  /// Rutas accesibles con sesi√≥n iniciada.
+  /// Rutas accesibles con sesiÛn iniciada.
   static const _authenticatedRoutes = [
     AppRoute.home,
     AppRoute.accessEvents,
@@ -187,12 +193,13 @@ class AppRouter {
     AppRoute.qrScanHistory,
     AppRoute.visitQr,
     AppRoute.visitConsultation,
+    AppRoute.announcements,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>
       _authenticatedRoutes.any((route) => _matchesRoute(route.path, location));
 
-  /// Compara una ruta con par√°metros contra la ruta realmente visitada,
+  /// Compara una ruta con par·metros contra la ruta realmente visitada,
   /// exigiendo igualdad en los segmentos literales.
   static bool _matchesRoute(String pattern, String location) {
     if (!pattern.contains(':')) return pattern == location;
