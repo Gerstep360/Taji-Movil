@@ -2,15 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/network/api_client.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
 import '../../../shared/widgets/taji_drawer.dart';
 import '../../../shared/widgets/taji_logo.dart';
+import '../../announcements/data/announcements_repository.dart';
+import '../../announcements/services/notification_popup_service.dart';
 import '../models/taji_user.dart';
 import '../state/auth_controller.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _unreadCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUnreadCount();
+      NotificationPopupService.instance.checkAndShowHighPriority(context);
+    });
+  }
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final repo = AnnouncementsRepository(context.read<ApiClient>());
+      final count = await repo.getUnreadNotificationCount();
+      if (mounted) {
+        setState(() => _unreadCount = count);
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +61,19 @@ class HomeScreen extends StatelessWidget {
         ),
         title: const TajiLogo(),
         actions: [
+          IconButton(
+            icon: Badge(
+              isLabelVisible: _unreadCount > 0,
+              label: Text('$_unreadCount'),
+              backgroundColor: const Color(0xFFEF4444),
+              child: const Icon(Icons.notifications_none_rounded, color: TajiColors.ink),
+            ),
+            tooltip: 'Notificaciones y Comunicados',
+            onPressed: () async {
+              await context.push(AppRoute.announcements.path);
+              if (mounted) _loadUnreadCount();
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: CircleAvatar(

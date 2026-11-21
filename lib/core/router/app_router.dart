@@ -233,11 +233,6 @@ class AppRouter {
         builder: (_, __) => const HandoversScreen(),
       ),
       GoRoute(
-        path: AppRoute.announcements.path,
-        name: AppRoute.announcements.name,
-        builder: (_, __) => const AnnouncementsScreen(),
-      ),
-      GoRoute(
         path: AppRoute.faceVerification.path,
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
@@ -251,6 +246,11 @@ class AppRouter {
           ),
           child: const ReservationsScreen(),
         ),
+      ),
+      GoRoute(
+        path: AppRoute.announcements.path,
+        name: AppRoute.announcements.name,
+        builder: (_, __) => const AnnouncementsScreen(),
       ),
     ],
   );
@@ -374,30 +374,6 @@ class AppRouter {
   }
 }
 
-class TajiSplashScreen extends StatelessWidget {
-  const TajiSplashScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TajiLogo(),
-            SizedBox(height: 22),
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.4),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
 class _RouteNotFoundScreen extends StatelessWidget {
   const _RouteNotFoundScreen();
 
@@ -425,6 +401,30 @@ class _RouteNotFoundScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    ),
+  );
+}
+
+class TajiSplashScreen extends StatelessWidget {
+  const TajiSplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    body: SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TajiLogo(),
+            SizedBox(height: 22),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.4),
+            ),
+          ],
         ),
       ),
     ),

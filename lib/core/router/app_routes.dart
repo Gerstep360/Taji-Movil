@@ -32,6 +32,7 @@ enum AppRoute {
   const AppRoute(this.path);
   final String path;
 
+  /// Ruta concreta de la pantalla de QR para una autorización dada.
   static String visitQrFor(int authorizationId) =>
       '/qr-visita/$authorizationId';
 }
