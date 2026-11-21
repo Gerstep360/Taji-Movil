@@ -20,15 +20,13 @@ La aplicación carga assets/config/app_config.json desde AppConfig en el arranqu
 
 ~~~json
 {
-  "apiBaseUrl": "http://192.168.100.223:8000/api/v1",
+  "apiBaseUrl": "https://167.86.106.105/taji/api/v1",
   "connectTimeoutMs": 12000,
   "receiveTimeoutMs": 12000
 }
 ~~~
 
-Esta es la fuente de configuración del binario. Los scripts PS1 no la reescriben, así que la aplicación release usa exactamente el valor compilado. Antes de publicar, cambia la URL a HTTPS del servidor de producción y vuelve a compilar.
-
-Para un emulador Android local puedes usar 10.0.2.2; para un teléfono físico usa la IP LAN accesible del Backend.
+La aplicación apunta al servidor de producción (`https://167.86.106.105/taji/api/v1`). El certificado TLS del servidor es válido y verificable con las CAs del sistema (Windows/Android), por lo que no hace falta ningún ajuste de SSL en la app; el `network_security_config.xml` ya permite el tráfico a esa IP y confía en las CAs del sistema y las instaladas por el usuario como respaldo. Para un emulador Android local apuntando al backend de desarrollo puedes usar 10.0.2.2; para un teléfono físico usa la IP LAN accesible del Backend.
 
 ## Requisitos
 

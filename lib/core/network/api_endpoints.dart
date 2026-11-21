@@ -1,7 +1,14 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
+  static const assets = _AssetEndpoints();
+  static const maintenance = _MaintenanceEndpoints();
   static const health = '/health/';
+  static const reports = '/cu31/';
+  /// Seguimiento y análisis Omni de incidencias (CU21 / CU22 / CU31).
+  static const incidentTracking = '/paquete3/incidents/';
+  static String incidentAIFor(String code) =>
+      '$incidentTracking${Uri.encodeComponent(code)}/ai/';
   static const visitConsultation = '/security/cu12/visits/';
   static const shiftLogs = '/security/novedades-turno/';
   static const handovers = '/security/entregas-turno/';
@@ -13,8 +20,26 @@ class ApiEndpoints {
   static const visitorAuthorizations = _VisitorAuthorizationEndpoints();
   static const visitQr = _VisitQrEndpoints();
   static const units = _UnitEndpoints();
+  static const incidents = _IncidentEndpoints();
   static const residents = _ResidentEndpoints();
+  static const community = _CommunityEndpoints();
   static const publicCondominiums = '/saas/condominiums/public/';
+}
+
+/// CU26 / T121: consulta de áreas comunes y disponibilidad.
+class _CommunityEndpoints {
+  const _CommunityEndpoints();
+  final String areas = '/community/areas/';
+  final String areaSchedules = '/community/area-schedules/';
+  final String areaBlocks = '/community/area-blocks/';
+}
+
+class _MaintenanceEndpoints {
+  const _MaintenanceEndpoints();
+  final String orders = '/maintenance/orders/';
+  String order(int id) => '/maintenance/orders/$id/';
+  String status(int id) => '/maintenance/orders/$id/status/';
+  String attachments(int id) => '/maintenance/orders/$id/attachments/';
 }
 
 class _SecurityShiftEndpoints {
@@ -42,6 +67,17 @@ class _AccessEventEndpoints {
   final String collection = '/security/access-events/';
   final String people = '/security/access-events/people/';
   final String units = '/security/access-events/units/';
+}
+
+/// CU18 / RF-18: registro de incidencias con evidencias (multipart).
+class _IncidentEndpoints {
+  const _IncidentEndpoints();
+
+  final String collection = '/incidents/';
+
+  /// Catálogo del formulario: categorías, sectores, unidades, activos y las
+  /// reglas de evidencia que aplica el servidor.
+  final String options = '/incidents/options/';
 }
 
 class _ResidentEndpoints {
@@ -91,6 +127,13 @@ class _VisitQrEndpoints {
 
   /// Guardias con actividad de escaneo, para filtrar la bitácora.
   final String scanGuards = '/security/visit-qr/scans/guards/';
+}
+
+class _AssetEndpoints {
+  const _AssetEndpoints();
+  final String collection = '/assets/';
+  final String scan = '/assets/scan/';
+  String history(int id) => '/assets/$id/history/';
 }
 
 class _AuthEndpoints {

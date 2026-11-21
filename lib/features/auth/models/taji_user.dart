@@ -65,6 +65,7 @@ class TajiUser {
     this.role,
     this.activeTenant,
     this.residentUnits = const [],
+    this.isSuperuser = false,
   });
 
   final int id;
@@ -76,6 +77,7 @@ class TajiUser {
   final TajiRole? role;
   final TajiTenant? activeTenant;
   final List<Map<String, dynamic>> residentUnits;
+  final bool isSuperuser;
 
   String get initials {
     final first = firstName.isEmpty ? '' : firstName[0];
@@ -84,6 +86,7 @@ class TajiUser {
   }
 
   factory TajiUser.fromJson(Map<String, dynamic> json) => TajiUser(
+    isSuperuser: json['is_superuser'] == true,
     id: json['id'] as int,
     email: json['email'] as String? ?? '',
     firstName: json['first_name'] as String? ?? '',
@@ -103,6 +106,7 @@ class TajiUser {
   );
 
   Map<String, dynamic> toJson() => {
+    'is_superuser': isSuperuser,
     'id': id,
     'email': email,
     'first_name': firstName,
@@ -122,6 +126,42 @@ class TajiUser {
 /// solo evitan mostrar una acción que el servidor va a rechazar; nunca
 /// sustituyen la validación del servidor.
 extension TajiUserAccess on TajiUser {
+  /// CU31: mismos roles admitidos por CanAccessReports del backend.
+  bool get canManageMaintenance =>
+      isSuperuser || hasPermission('manage_maintenance');
+  bool get canUpdateMaintenanceOrders =>
+      canManageMaintenance || hasPermission('update_work_order_status');
+  bool get canAttachWorkEvidence =>
+      canManageMaintenance || hasPermission('attach_work_evidence');
+  bool get canAccessMaintenance =>
+      canManageMaintenance ||
+      const [
+        'view_assigned_work_orders',
+        'update_work_order_status',
+        'attach_work_evidence',
+        'maintain_assets',
+        'access_assigned_external_orders',
+      ].any(hasPermission);
+  bool get canViewAssets =>
+      isSuperuser ||
+      const [
+        'manage_assets',
+        'manage_maintenance',
+        'view_general_status',
+        'maintain_assets',
+      ].any(hasPermission);
+
+  bool get canUseReports =>
+      isSuperuser ||
+      hasPermission('view_reports') ||
+      const {
+        'admin',
+        'administrador',
+        'superadmin',
+        'seguridad',
+        'operador',
+      }.contains(role?.slug.toLowerCase());
+
   bool hasPermission(String code) => role?.permissions.contains(code) ?? false;
 
   /// CU11: registra eventos de entrada, salida y acceso denegado en portería.
@@ -141,6 +181,20 @@ extension TajiUserAccess on TajiUser {
       hasPermission('manage_visits') ||
       role?.slug == 'residente';
 
+  /// CU18: registrar incidencias. El backend lo permite a roles con
+  /// `report_incidents` o `manage_incidents`. Si la sesión guardada no trae la
+  /// lista de permisos, se usa el rol como respaldo (residente y
+  /// administración); `seguridad` solo con el permiso explícito.
+  bool get canReportIncidents {
+    if (isSuperuser) return true;
+    final permissions = role?.permissions ?? const <String>[];
+    if (permissions.isNotEmpty) {
+      return hasPermission('report_incidents') ||
+          hasPermission('manage_incidents');
+    }
+    return role?.slug == 'residente' || isAdmin;
+  }
+
   bool get isAdmin => role?.slug == 'administrador' || role?.slug == 'superadmin';
 
   /// CU13 móvil: consulta y operación del turno propio del guardia.
@@ -152,4 +206,12 @@ extension TajiUserAccess on TajiUser {
       ].contains(role?.slug.toLowerCase()) ||
       hasPermission('operate_security_shifts') ||
       hasPermission('view_security_shifts');
+
+  /// CU24: Escanear y consultar activos mediante QR.
+  /// Requiere: manage_assets, view_general_status, o maintain_assets.
+  bool get canAccessAssets =>
+      isAdmin ||
+      hasPermission('manage_assets') ||
+      hasPermission('view_general_status') ||
+      hasPermission('maintain_assets');
 }

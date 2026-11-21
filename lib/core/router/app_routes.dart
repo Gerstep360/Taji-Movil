@@ -4,6 +4,13 @@ enum AppRoute {
   register('/crear-cuenta'),
   forgotPassword('/recuperar-contrasena'),
   home('/inicio'),
+  incidents('/incidencias'),
+  reports('/reportes'),
+  maintenanceOrders('/mantenimiento'),
+  assets('/activos'),
+  assetQr('/identificar-activo-qr'),
+  management('/gestion/:moduleKey'),
+  incidentAnalysis('/clasificacion-ia'),
   accessEvents('/control-accesos'),
   newAccessEvent('/control-accesos/nuevo'),
   securityShifts('/mis-turnos'),
@@ -14,7 +21,11 @@ enum AppRoute {
   visitQr('/qr-visita/:authorizationId'),
   visitQrScanner('/escanear-qr'),
   qrScanHistory('/bitacora-escaneos'),
-  visitConsultation('/visitas-dentro');
+  visitConsultation('/visitas-dentro'),
+  // CU26 / T121: consulta de áreas comunes y disponibilidad.
+  communityAreas('/areas-comunes'),
+  // CU18 / T114-T115: registrar una incidencia con evidencias.
+  reportIncident('/incidencias/nueva');
 
   const AppRoute(this.path);
   final String path;

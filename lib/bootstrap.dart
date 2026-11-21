@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
+import 'features/maintenance/data/maintenance_order_repository.dart';
+import 'features/community/data/community_repository.dart';
 import 'core/config/api_config.dart';
 import 'core/network/api_client.dart';
 import 'core/network/token_store.dart';
@@ -12,6 +14,8 @@ import 'core/router/app_router.dart';
 import 'core/theme/taji_theme.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'features/auth/state/auth_controller.dart';
+import 'features/incidents/data/evidence_picker.dart';
+import 'features/incidents/data/incident_repository.dart';
 import 'features/security/data/security_shift_repository.dart';
 import 'features/security/data/access_event_repository.dart';
 import 'features/security/data/shift_log_repository.dart';
@@ -50,6 +54,12 @@ Future<void> bootstrap() async {
     MultiProvider(
       providers: [
         Provider<ApiClient>.value(value: api),
+        Provider<MaintenanceOrderDataSource>(
+          create: (_) => MaintenanceOrderRepository(api),
+        ),
+        Provider<CommunityDataSource>(
+          create: (_) => CommunityRepository(api),
+        ),
         Provider<HandoverDataSource>(create: (_) => HandoverRepository(api)),
         Provider<ShiftLogDataSource>(create: (_) => ShiftLogRepository(api)),
         Provider<SecurityShiftDataSource>(
@@ -58,6 +68,8 @@ Future<void> bootstrap() async {
         Provider<AccessEventDataSource>(
           create: (_) => AccessEventRepository(api),
         ),
+        Provider<IncidentDataSource>(create: (_) => IncidentRepository(api)),
+        Provider<EvidencePicker>(create: (_) => ImagePickerEvidencePicker()),
         Provider<AuthRepository>.value(value: repository),
         Provider<VisitorAuthorizationRepository>.value(
           value: visitorRepository,
