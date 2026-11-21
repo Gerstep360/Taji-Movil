@@ -35,6 +35,7 @@ import '../../features/visitors/screens/visit_qr_scanner_screen.dart';
 import '../../features/visitors/screens/visit_qr_screen.dart';
 import '../../features/visitors/screens/visitor_authorizations_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
+import '../../features/announcements/screens/announcements_screen.dart';
 import 'app_routes.dart';
 import '../../features/incidents/incident_tracking.dart';
 import '../../features/incidents/incident_report_screen.dart';
@@ -232,6 +233,11 @@ class AppRouter {
         builder: (_, __) => const HandoversScreen(),
       ),
       GoRoute(
+        path: AppRoute.announcements.path,
+        name: AppRoute.announcements.name,
+        builder: (_, __) => const AnnouncementsScreen(),
+      ),
+      GoRoute(
         path: AppRoute.faceVerification.path,
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
@@ -343,6 +349,7 @@ class AppRouter {
     AppRoute.visitQr,
     AppRoute.visitConsultation,
     AppRoute.reservations,
+    AppRoute.announcements,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>

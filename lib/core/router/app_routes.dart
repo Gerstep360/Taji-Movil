@@ -25,12 +25,13 @@ enum AppRoute {
   visitConsultation('/visitas-dentro'),
   // CU26 / T121: consulta de áreas comunes y disponibilidad.
   communityAreas('/areas-comunes'),
-  reservations('/reservas');
+  reservations('/reservas'),
+  // CU28 / T123: centro de comunicados y notificaciones.
+  announcements('/comunicados');
 
   const AppRoute(this.path);
   final String path;
 
-  /// Ruta concreta de la pantalla de QR para una autorización dada.
   static String visitQrFor(int authorizationId) =>
       '/qr-visita/$authorizationId';
 }

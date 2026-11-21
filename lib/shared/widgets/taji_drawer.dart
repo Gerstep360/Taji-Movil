@@ -421,11 +421,11 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         icon: Icons.park_outlined,
                         route: '/gestion/areas',
                       ),
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
                         label: 'Comunicados y Avisos',
                         icon: Icons.campaign_outlined,
-                        route: '/gestion/announcements',
-                        isActive: currentLocation == '/gestion/announcements',
+                        route: AppRoute.announcements.path,
+                        isActive: currentLocation == AppRoute.announcements.path,
                         isAvailable: true,
                       ),
                       _DrawerSubItem(
