@@ -16,7 +16,9 @@ enum AppRoute {
   qrScanHistory('/bitacora-escaneos'),
   visitConsultation('/visitas-dentro'),
   // CU18 / T114-T115: registrar una incidencia con evidencias.
-  reportIncident('/incidencias/nueva');
+  reportIncident('/incidencias/nueva'),
+  // CU28 / T123: centro de comunicados y notificaciones.
+  announcements('/comunicados');
 
   const AppRoute(this.path);
   final String path;

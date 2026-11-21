@@ -23,6 +23,7 @@ import '../../features/visitors/screens/visit_consultation_screen.dart';
 import '../../features/visitors/screens/visit_qr_scanner_screen.dart';
 import '../../features/visitors/screens/visit_qr_screen.dart';
 import '../../features/visitors/screens/visitor_authorizations_screen.dart';
+import '../../features/announcements/screens/announcements_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
 import 'app_routes.dart';
 
@@ -144,6 +145,11 @@ class AppRouter {
           picker: context.read<EvidencePicker>(),
         ),
       ),
+      GoRoute(
+        path: AppRoute.announcements.path,
+        name: AppRoute.announcements.name,
+        builder: (_, __) => const AnnouncementsScreen(),
+      ),
     ],
   );
 
@@ -204,6 +210,7 @@ class AppRouter {
     AppRoute.visitQr,
     AppRoute.visitConsultation,
     AppRoute.reportIncident,
+    AppRoute.announcements,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>

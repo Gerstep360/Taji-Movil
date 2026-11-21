@@ -16,6 +16,25 @@ class ApiEndpoints {
   static const incidents = _IncidentEndpoints();
   static const residents = _ResidentEndpoints();
   static const publicCondominiums = '/saas/condominiums/public/';
+  static const announcements = _AnnouncementEndpoints();
+  static const notifications = _NotificationEndpoints();
+}
+
+class _AnnouncementEndpoints {
+  const _AnnouncementEndpoints();
+
+  final String collection = '/paquete5/cu28/announcements/';
+  String detail(int id) => '/paquete5/cu28/announcements/$id/';
+}
+
+class _NotificationEndpoints {
+  const _NotificationEndpoints();
+
+  final String collection = '/notifications/';
+  final String unreadCount = '/notifications/unread_count/';
+  final String markAllRead = '/notifications/mark_all_read/';
+  final String devices = '/notifications/devices/';
+  String markRead(int id) => '/notifications/$id/mark_read/';
 }
 
 class _SecurityShiftEndpoints {
