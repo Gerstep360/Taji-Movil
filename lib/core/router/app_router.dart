@@ -65,7 +65,7 @@ class AppRouter {
         name: AppRoute.visitorAuthorizations.name,
         builder: (_, __) => const VisitorAuthorizationsScreen(),
       ),
-      // T105 / CU09: QR temporal y vigencia de una autorización concreta.
+      // T105 / CU09: QR temporal y vigencia de una autorizaciÃ³n concreta.
       GoRoute(
         path: AppRoute.visitQr.path,
         name: AppRoute.visitQr.name,
@@ -90,7 +90,7 @@ class AppRouter {
         name: AppRoute.visitQrScanner.name,
         builder: (_, __) => const VisitQrScannerScreen(),
       ),
-      // CU10: bitácora de escaneos. El registro vive en el servidor, así que
+      // CU10: bitÃ¡cora de escaneos. El registro vive en el servidor, asÃ­ que
       // a diferencia del historial del lector sobrevive a cerrar la app.
       GoRoute(
         path: AppRoute.qrScanHistory.path,
@@ -130,14 +130,14 @@ class AppRouter {
         builder: (_, __) => const HandoversScreen(),
       ),
       GoRoute(
-        path: AppRoute.announcements.path,
-        name: AppRoute.announcements.name,
-        builder: (_, __) => const AnnouncementsScreen(),
-      ),
-      GoRoute(
         path: AppRoute.faceVerification.path,
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.announcements.path,
+        name: AppRoute.announcements.name,
+        builder: (_, __) => const AnnouncementsScreen(),
       ),
     ],
   );
@@ -167,7 +167,7 @@ class AppRouter {
         auth.user?.canUseSecurityShifts != true) {
       return AppRoute.home.path;
     }
-    // La bitácora de escaneos la lee el mismo permiso que valida los QR.
+    // La bitÃ¡cora de escaneos la lee el mismo permiso que valida los QR.
     if (location == AppRoute.qrScanHistory.path &&
         auth.user?.canValidateVisits != true) {
       return AppRoute.home.path;
@@ -179,7 +179,7 @@ class AppRouter {
     return _isAuthenticatedRoute(location) ? null : AppRoute.home.path;
   }
 
-  /// Rutas accesibles con sesión iniciada.
+  /// Rutas accesibles con sesiÃ³n iniciada.
   static const _authenticatedRoutes = [
     AppRoute.home,
     AppRoute.accessEvents,
@@ -199,7 +199,7 @@ class AppRouter {
   static bool _isAuthenticatedRoute(String location) =>
       _authenticatedRoutes.any((route) => _matchesRoute(route.path, location));
 
-  /// Compara una ruta con parámetros contra la ruta realmente visitada,
+  /// Compara una ruta con parÃ¡metros contra la ruta realmente visitada,
   /// exigiendo igualdad en los segmentos literales.
   static bool _matchesRoute(String pattern, String location) {
     if (!pattern.contains(':')) return pattern == location;
@@ -216,30 +216,6 @@ class AppRouter {
     }
     return true;
   }
-}
-
-class TajiSplashScreen extends StatelessWidget {
-  const TajiSplashScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TajiLogo(),
-            SizedBox(height: 22),
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.4),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 class _RouteNotFoundScreen extends StatelessWidget {
@@ -269,6 +245,30 @@ class _RouteNotFoundScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    ),
+  );
+}
+
+class TajiSplashScreen extends StatelessWidget {
+  const TajiSplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    body: SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TajiLogo(),
+            SizedBox(height: 22),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.4),
+            ),
+          ],
         ),
       ),
     ),

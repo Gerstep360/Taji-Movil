@@ -87,7 +87,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen>
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getPriorityColor(item.priority).withOpacity(0.12),
+                      color: _getPriorityColor(item.priority).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -190,9 +190,9 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen>
           ],
           bottom: TabBar(
             controller: _tabController,
-            labelColor: TajiTheme.primaryColor,
+            labelColor: TajiColors.primary,
             unselectedLabelColor: Colors.grey.shade600,
-            indicatorColor: TajiTheme.primaryColor,
+            indicatorColor: TajiColors.primary,
             tabs: [
               const Tab(
                 icon: Icon(Icons.campaign_outlined),
@@ -231,7 +231,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen>
                       if (controller.error != null)
                         Padding(
                           padding: const EdgeInsets.all(12),
-                          child: StatusBanner.error(message: controller.error!),
+                          child: StatusBanner(message: controller.error!),
                         ),
                       // Chips de filtro por audiencia
                       SingleChildScrollView(
@@ -421,7 +421,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen>
                                                   ? Icons.mark_email_unread_outlined
                                                   : Icons.mail_outline,
                                               color: isUnread
-                                                  ? TajiTheme.primaryColor
+                                                  ? TajiColors.primary
                                                   : Colors.grey.shade500,
                                               size: 22,
                                             ),
