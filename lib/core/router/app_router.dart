@@ -21,6 +21,7 @@ import '../../features/visitors/screens/visit_qr_scanner_screen.dart';
 import '../../features/visitors/screens/visit_qr_screen.dart';
 import '../../features/visitors/screens/visitor_authorizations_screen.dart';
 import '../../shared/widgets/taji_logo.dart';
+import '../../features/announcements/screens/announcements_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -133,6 +134,11 @@ class AppRouter {
         name: AppRoute.faceVerification.name,
         builder: (_, __) => const FaceVerificationScreen(),
       ),
+      GoRoute(
+        path: AppRoute.announcements.path,
+        name: AppRoute.announcements.name,
+        builder: (_, __) => const AnnouncementsScreen(),
+      ),
     ],
   );
 
@@ -187,6 +193,7 @@ class AppRouter {
     AppRoute.qrScanHistory,
     AppRoute.visitQr,
     AppRoute.visitConsultation,
+    AppRoute.announcements,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>
@@ -209,30 +216,6 @@ class AppRouter {
     }
     return true;
   }
-}
-
-class TajiSplashScreen extends StatelessWidget {
-  const TajiSplashScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TajiLogo(),
-            SizedBox(height: 22),
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2.4),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 class _RouteNotFoundScreen extends StatelessWidget {
@@ -262,6 +245,30 @@ class _RouteNotFoundScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    ),
+  );
+}
+
+class TajiSplashScreen extends StatelessWidget {
+  const TajiSplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(
+    body: SafeArea(
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TajiLogo(),
+            SizedBox(height: 22),
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2.4),
+            ),
+          ],
         ),
       ),
     ),
