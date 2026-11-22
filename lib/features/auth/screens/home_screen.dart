@@ -2,15 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/network/api_client.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/taji_theme.dart';
 import '../../../shared/widgets/taji_drawer.dart';
 import '../../../shared/widgets/taji_logo.dart';
+import '../../announcements/data/announcements_repository.dart';
+import '../../announcements/services/notification_popup_service.dart';
+import '../../reservations/reservation_access.dart';
 import '../models/taji_user.dart';
 import '../state/auth_controller.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _unreadCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _loadUnreadCount();
+      NotificationPopupService.instance.checkAndShowHighPriority(context);
+    });
+  }
+
+  Future<void> _loadUnreadCount() async {
+    try {
+      final repo = AnnouncementsRepository(context.read<ApiClient>());
+      final count = await repo.getUnreadNotificationCount();
+      if (mounted) {
+        setState(() => _unreadCount = count);
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +63,22 @@ class HomeScreen extends StatelessWidget {
         ),
         title: const TajiLogo(),
         actions: [
+          IconButton(
+            icon: Badge(
+              isLabelVisible: _unreadCount > 0,
+              label: Text('$_unreadCount'),
+              backgroundColor: const Color(0xFFEF4444),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: TajiColors.ink,
+              ),
+            ),
+            tooltip: 'Notificaciones y Comunicados',
+            onPressed: () async {
+              await context.push(AppRoute.announcements.path);
+              if (mounted) _loadUnreadCount();
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
             child: CircleAvatar(
@@ -72,7 +119,10 @@ class HomeScreen extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(20),
@@ -81,7 +131,11 @@ class HomeScreen extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.business_rounded, color: TajiColors.primary, size: 14),
+                      const Icon(
+                        Icons.business_rounded,
+                        color: TajiColors.primary,
+                        size: 14,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         user.activeTenant?.name ?? 'Condominio Taji',
@@ -91,7 +145,8 @@ class HomeScreen extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      if (user.activeTenant?.slug != null && user.activeTenant!.slug.isNotEmpty) ...[
+                      if (user.activeTenant?.slug != null &&
+                          user.activeTenant!.slug.isNotEmpty) ...[
                         const SizedBox(width: 6),
                         Text(
                           '· ${user.activeTenant!.slug}',
@@ -120,11 +175,17 @@ class HomeScreen extends StatelessWidget {
                   onTap: () => context.push(AppRoute.accessEvents.path),
                 ),
               ),
-            if (['manage_visits', 'register_visits', 'validate_visits', 'register_entry_exit'].any(user.hasPermission))
+            if ([
+              'manage_visits',
+              'register_visits',
+              'validate_visits',
+              'register_entry_exit',
+            ].any(user.hasPermission))
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: OutlinedButton.icon(
-                  onPressed: () => context.push(AppRoute.visitConsultation.path),
+                  onPressed: () =>
+                      context.push(AppRoute.visitConsultation.path),
                   icon: const Icon(Icons.people_outline),
                   label: const Text('Consultar visitas y personas dentro'),
                 ),
@@ -181,7 +242,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Accede a los módulos de seguridad, pases QR y biometría desde los accesos rápidos o el menú lateral.',
+                    'Gestiona incidencias, reservas, comunicados y reportes desde los accesos rápidos o el menú lateral.',
                     style: TextStyle(
                       color: Color(0xE0FFFFFF),
                       height: 1.45,
@@ -207,7 +268,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Paquete 2: Seguridad',
+                  'Tu comunidad',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -218,6 +279,56 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            if (user.canUseReports) ...[
+              _ActionCard(
+                icon: Icons.picture_as_pdf_outlined,
+                iconColor: TajiColors.primary,
+                iconBackground: TajiColors.primarySoft,
+                title: 'Reportes y PDF',
+                subtitle: 'Consulta, filtra y comparte PDF, Excel o CSV',
+                onTap: () => context.push(AppRoute.reports.path),
+              ),
+              const SizedBox(height: 10),
+            ],
+            _ActionCard(
+              icon: Icons.report_problem_outlined,
+              iconColor: TajiColors.primary,
+              iconBackground: TajiColors.primarySoft,
+              title: 'Incidencias e IA',
+              subtitle: 'Consulta el estado y la clasificación de cada reporte',
+              onTap: () => context.push(AppRoute.incidents.path),
+            ),
+            const SizedBox(height: 10),
+            if (user.canUseReservations) ...[
+              _ActionCard(
+                icon: Icons.event_available_outlined,
+                iconColor: TajiColors.primary,
+                iconBackground: TajiColors.primarySoft,
+                title: 'Reservar un área',
+                subtitle: 'Consulta espacios y horarios de tu comunidad',
+                onTap: () => context.push(AppRoute.reservations.path),
+              ),
+              const SizedBox(height: 10),
+            ],
+            // CU26 / T121: consulta de disponibilidad de áreas comunes.
+            _ActionCard(
+              icon: Icons.park_outlined,
+              iconColor: TajiColors.primary,
+              iconBackground: TajiColors.primarySoft,
+              title: 'Áreas comunes (CU26)',
+              subtitle: 'Disponibilidad, horarios y bloqueos de los espacios',
+              onTap: () => context.push(AppRoute.communityAreas.path),
+            ),
+            const SizedBox(height: 10),
+            _ActionCard(
+              icon: Icons.campaign_outlined,
+              iconColor: TajiColors.primary,
+              iconBackground: TajiColors.primarySoft,
+              title: 'Comunicados',
+              subtitle: 'Avisos vigentes del condominio',
+              onTap: () => context.push(AppRoute.announcements.path),
+            ),
+            const SizedBox(height: 10),
             if (user.canUseSecurityShifts) ...[
               _ActionCard(
                 icon: Icons.schedule,
@@ -252,7 +363,8 @@ class HomeScreen extends StatelessWidget {
               iconColor: const Color(0xFF0F6FFF),
               iconBackground: const Color(0xFFEAF4FF),
               title: 'Pases QR de Visita (CU09)',
-              subtitle: 'Genera códigos QR temporales y seguros para tus visitas',
+              subtitle:
+                  'Genera códigos QR temporales y seguros para tus visitas',
               onTap: () => context.push(AppRoute.visitorAuthorizations.path),
             ),
             const SizedBox(height: 10),
@@ -261,7 +373,8 @@ class HomeScreen extends StatelessWidget {
               iconColor: const Color(0xFF059669),
               iconBackground: const Color(0xFFECFDF5),
               title: 'Lector QR en Portería (CU10)',
-              subtitle: 'Escaneo con cámara y verificación de validez de visitas',
+              subtitle:
+                  'Escaneo con cámara y verificación de validez de visitas',
               onTap: () => context.push(AppRoute.visitQrScanner.path),
             ),
             const SizedBox(height: 10),
@@ -429,7 +542,11 @@ class _InfoCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 11, color: TajiColors.muted, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: TajiColors.muted,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(

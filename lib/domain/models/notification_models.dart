@@ -30,7 +30,9 @@ class AnnouncementModel {
   factory AnnouncementModel.fromJson(Map<String, dynamic> json) =>
       AnnouncementModel(
         id: readInt(json['id']),
-        createdByUserId: readNullableInt(json['created_by_user_id']),
+        createdByUserId: readNullableInt(
+          json['created_by_user'] ?? json['created_by_user_id'],
+        ),
         title: readString(json['title']),
         body: readString(json['body']),
         audience: readString(json['audience']),
@@ -69,7 +71,7 @@ class DeviceTokenModel {
   });
 
   final int id;
-  final int userId;
+  final int? userId;
   final String token;
   final String platform;
   final bool isActive;
@@ -79,7 +81,7 @@ class DeviceTokenModel {
   factory DeviceTokenModel.fromJson(Map<String, dynamic> json) =>
       DeviceTokenModel(
         id: readInt(json['id']),
-        userId: readInt(json['user_id']),
+        userId: readNullableInt(json['user_id']),
         token: readString(json['token']),
         platform: readString(json['platform']),
         isActive: readBool(json['is_active']),
@@ -107,31 +109,41 @@ class NotificationModel {
     required this.message,
     required this.resourceType,
     required this.resourceId,
+    this.priority = 'NORMAL',
+    this.audience,
     required this.sentAt,
     required this.readAt,
     required this.createdAt,
   });
 
   final int id;
-  final int userId;
+  final int? userId;
   final String notificationType;
   final String title;
   final String message;
   final String? resourceType;
   final String? resourceId;
+  final String priority;
+  final String? audience;
   final DateTime? sentAt;
   final DateTime? readAt;
   final DateTime createdAt;
 
+  bool get isRead => readAt != null;
+  bool get isHighPriority =>
+      priority.toUpperCase() == 'HIGH' || priority.toUpperCase() == 'URGENT';
+
   factory NotificationModel.fromJson(Map<String, dynamic> json) =>
       NotificationModel(
         id: readInt(json['id']),
-        userId: readInt(json['user_id']),
+        userId: readNullableInt(json['user_id']),
         notificationType: readString(json['notification_type']),
         title: readString(json['title']),
         message: readString(json['message']),
         resourceType: readNullableString(json['resource_type']),
         resourceId: readNullableString(json['resource_id']),
+        priority: readString(json['priority'] ?? 'NORMAL'),
+        audience: readNullableString(json['audience']),
         sentAt: readNullableDateTime(json['sent_at']),
         readAt: readNullableDateTime(json['read_at']),
         createdAt: readDateTime(json['created_at']),
@@ -145,6 +157,8 @@ class NotificationModel {
     'message': message,
     'resource_type': resourceType,
     'resource_id': resourceId,
+    'priority': priority,
+    'audience': audience,
     'sent_at': sentAt?.toIso8601String(),
     'read_at': readAt?.toIso8601String(),
     'created_at': createdAt.toIso8601String(),

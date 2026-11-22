@@ -22,7 +22,7 @@ class ApiFailure implements Exception {
   final String? traceId;
 
   String get displayMessage {
-    final base;
+    final String base;
     if (fields.isEmpty) {
       base = message;
     } else {
