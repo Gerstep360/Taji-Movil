@@ -30,7 +30,9 @@ class AnnouncementModel {
   factory AnnouncementModel.fromJson(Map<String, dynamic> json) =>
       AnnouncementModel(
         id: readInt(json['id']),
-        createdByUserId: readNullableInt(json['created_by_user_id']),
+        createdByUserId: readNullableInt(
+          json['created_by_user'] ?? json['created_by_user_id'],
+        ),
         title: readString(json['title']),
         body: readString(json['body']),
         audience: readString(json['audience']),
@@ -69,7 +71,7 @@ class DeviceTokenModel {
   });
 
   final int id;
-  final int userId;
+  final int? userId;
   final String token;
   final String platform;
   final bool isActive;
@@ -79,7 +81,7 @@ class DeviceTokenModel {
   factory DeviceTokenModel.fromJson(Map<String, dynamic> json) =>
       DeviceTokenModel(
         id: readInt(json['id']),
-        userId: readInt(json['user_id']),
+        userId: readNullableInt(json['user_id']),
         token: readString(json['token']),
         platform: readString(json['platform']),
         isActive: readBool(json['is_active']),
@@ -115,7 +117,7 @@ class NotificationModel {
   });
 
   final int id;
-  final int userId;
+  final int? userId;
   final String notificationType;
   final String title;
   final String message;
@@ -128,12 +130,13 @@ class NotificationModel {
   final DateTime createdAt;
 
   bool get isRead => readAt != null;
-  bool get isHighPriority => priority.toUpperCase() == 'HIGH' || priority.toUpperCase() == 'URGENT';
+  bool get isHighPriority =>
+      priority.toUpperCase() == 'HIGH' || priority.toUpperCase() == 'URGENT';
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) =>
       NotificationModel(
         id: readInt(json['id']),
-        userId: readInt(json['user_id']),
+        userId: readNullableInt(json['user_id']),
         notificationType: readString(json['notification_type']),
         title: readString(json['title']),
         message: readString(json['message']),

@@ -2,8 +2,11 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:taji/core/network/api_client.dart';
 import 'package:taji/core/network/token_store.dart';
+import 'package:taji/features/announcements/data/announcements_repository.dart';
+import 'package:taji/features/assemblies/data/assemblies_repository.dart';
 import 'package:taji/features/management/module_catalog.dart';
 import 'package:taji/features/management/module_repository.dart';
+import 'package:taji/features/reservations/data/reservation_repository.dart';
 import 'package:taji/paquetes/paquete6_reportes_analitica/cu31_reportes/report_models.dart';
 import 'package:taji/paquetes/paquete6_reportes_analitica/cu31_reportes/report_repository.dart';
 
@@ -118,7 +121,67 @@ void main() {
         'pdf',
       );
       expect(String.fromCharCodes(pdf.take(5)), '%PDF-');
+
+      final noticeTitle = 'Aviso nativo $stamp';
+      await client.post<Map<String, dynamic>>(
+        '/paquete5/cu28/announcements/',
+        data: {
+          'title': noticeTitle,
+          'body': 'Contrato integrado de notificaciones',
+          'audience': 'RESIDENTS',
+          'priority': 'HIGH',
+          'status': 'PUBLISHED',
+        },
+      );
+      final activeAssembly = (await client.post<Map<String, dynamic>>(
+        '/assemblies/',
+        data: {
+          'title': 'Asamblea nativa $stamp',
+          'scheduled_at': DateTime.now()
+              .add(const Duration(days: 1))
+              .toUtc()
+              .toIso8601String(),
+          'location': 'Salón local',
+        },
+      ))!;
+      final assemblyId = activeAssembly['id'] as int;
+      await client.post<Map<String, dynamic>>(
+        '/assemblies/$assemblyId/start/',
+        data: {},
+      );
+      await client.post<Map<String, dynamic>>(
+        '/agreements/',
+        data: {'assembly': assemblyId, 'title': 'Acuerdo nativo $stamp'},
+      );
+      final assemblies = AssembliesRepository(client);
+      expect(
+        (await assemblies.list()).items.any((item) => item.id == assemblyId),
+        isTrue,
+      );
+      expect(
+        (await assemblies.agreements(assemblyId)).single.title,
+        'Acuerdo nativo $stamp',
+      );
+
       await login('residente');
+      final announcements = AnnouncementsRepository(client);
+      expect(
+        (await announcements.getAnnouncements()).any(
+          (item) => item.title == noticeTitle,
+        ),
+        isTrue,
+      );
+      final unread = (await announcements.getNotifications(
+        unreadOnly: true,
+      )).firstWhere((item) => item.title == noticeTitle);
+      await announcements.markNotificationAsRead(unread.id);
+      expect(
+        (await announcements.getNotifications(
+          unreadOnly: true,
+        )).any((item) => item.id == unread.id),
+        isFalse,
+      );
+
       final start = DateTime.now().add(const Duration(days: 3));
       final reservation = await create('reservations', {
         'common_area': area['id'],
@@ -131,6 +194,20 @@ void main() {
         'status': 'CANCELLED',
       }, original: reservation);
       expect(cancelled['status'], 'CANCELLED');
+      final cu27 = ReservationRepository(client);
+      final nativeArea = (await cu27.listAreas()).firstWhere(
+        (item) => item.id == area['id'],
+      );
+      final free = await cu27.availability(nativeArea.id, start);
+      expect(free.bookable, isTrue);
+      final nativeReservation = await cu27.create(
+        areaId: nativeArea.id,
+        start: start,
+        end: start.add(const Duration(hours: 1)),
+        purpose: 'Contrato CU27',
+      );
+      expect(nativeReservation.status, 'APPROVED');
+      expect((await cu27.cancel(nativeReservation.id)).status, 'CANCELLED');
       expect(
         (await repository.list(mobileModules['announcements']!)).items,
         isNotEmpty,

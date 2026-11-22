@@ -9,6 +9,7 @@ import '../../../shared/widgets/taji_drawer.dart';
 import '../../../shared/widgets/taji_logo.dart';
 import '../../announcements/data/announcements_repository.dart';
 import '../../announcements/services/notification_popup_service.dart';
+import '../../reservations/reservation_access.dart';
 import '../models/taji_user.dart';
 import '../state/auth_controller.dart';
 
@@ -26,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       _loadUnreadCount();
       NotificationPopupService.instance.checkAndShowHighPriority(context);
     });
@@ -66,7 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
               isLabelVisible: _unreadCount > 0,
               label: Text('$_unreadCount'),
               backgroundColor: const Color(0xFFEF4444),
-              child: const Icon(Icons.notifications_none_rounded, color: TajiColors.ink),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: TajiColors.ink,
+              ),
             ),
             tooltip: 'Notificaciones y Comunicados',
             onPressed: () async {
@@ -294,15 +299,17 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () => context.push(AppRoute.incidents.path),
             ),
             const SizedBox(height: 10),
-            _ActionCard(
-              icon: Icons.event_available_outlined,
-              iconColor: TajiColors.primary,
-              iconBackground: TajiColors.primarySoft,
-              title: 'Reservar un área',
-              subtitle: 'Consulta espacios y horarios de tu comunidad',
-              onTap: () => context.push('/gestion/reservations'),
-            ),
-            const SizedBox(height: 10),
+            if (user.canUseReservations) ...[
+              _ActionCard(
+                icon: Icons.event_available_outlined,
+                iconColor: TajiColors.primary,
+                iconBackground: TajiColors.primarySoft,
+                title: 'Reservar un área',
+                subtitle: 'Consulta espacios y horarios de tu comunidad',
+                onTap: () => context.push(AppRoute.reservations.path),
+              ),
+              const SizedBox(height: 10),
+            ],
             // CU26 / T121: consulta de disponibilidad de áreas comunes.
             _ActionCard(
               icon: Icons.park_outlined,
@@ -319,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
               iconBackground: TajiColors.primarySoft,
               title: 'Comunicados',
               subtitle: 'Avisos vigentes del condominio',
-              onTap: () => context.push('/gestion/announcements'),
+              onTap: () => context.push(AppRoute.announcements.path),
             ),
             const SizedBox(height: 10),
             if (user.canUseSecurityShifts) ...[

@@ -30,10 +30,9 @@ void main() {
       expect(model.isRead, isFalse);
     });
 
-    test('asigna valores por defecto si prioridad no está presente', () {
+    test('acepta una notificación sin el identificador de usuario', () {
       final json = {
         'id': 106,
-        'user_id': 3,
         'notification_type': 'ANNOUNCEMENT',
         'title': 'Aviso Normal',
         'message': 'Mensaje general.',
@@ -44,6 +43,7 @@ void main() {
 
       final model = NotificationModel.fromJson(json);
 
+      expect(model.userId, isNull);
       expect(model.priority, 'NORMAL');
       expect(model.isHighPriority, isFalse);
     });
@@ -65,28 +65,36 @@ void main() {
       createdAt: DateTime.parse('2026-11-21T12:00:00Z'),
     );
 
-    testWidgets('renderiza el diálogo con título, contenido y badge de prioridad', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: AnnouncementPopupDialog(
-              notification: sampleNotif,
-              onUnderstood: () async {},
-              onDismissForSession: () {},
+    testWidgets(
+      'renderiza el diálogo con título, contenido y badge de prioridad',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: AnnouncementPopupDialog(
+                notification: sampleNotif,
+                onUnderstood: () async {},
+                onDismissForSession: () {},
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Mantenimiento del Tanque de Agua'), findsOneWidget);
-      expect(find.textContaining('suministro de agua será suspendido'), findsOneWidget);
-      expect(find.text('Prioridad HIGH'), findsOneWidget);
-      expect(find.text('Audiencia: RESIDENTS'), findsOneWidget);
-      expect(find.text('Ver después'), findsOneWidget);
-      expect(find.text('Entendido'), findsOneWidget);
-    });
+        expect(find.text('Mantenimiento del Tanque de Agua'), findsOneWidget);
+        expect(
+          find.textContaining('suministro de agua será suspendido'),
+          findsOneWidget,
+        );
+        expect(find.text('Prioridad HIGH'), findsOneWidget);
+        expect(find.text('Audiencia: RESIDENTS'), findsOneWidget);
+        expect(find.text('Ver después'), findsOneWidget);
+        expect(find.text('Entendido'), findsOneWidget);
+      },
+    );
 
-    testWidgets('acciona onDismissForSession al presionar "Ver después"', (tester) async {
+    testWidgets('acciona onDismissForSession al presionar "Ver después"', (
+      tester,
+    ) async {
       bool dismissed = false;
 
       await tester.pumpWidget(
@@ -109,7 +117,9 @@ void main() {
       expect(dismissed, isTrue);
     });
 
-    testWidgets('acciona onUnderstood al presionar "Entendido"', (tester) async {
+    testWidgets('acciona onUnderstood al presionar "Entendido"', (
+      tester,
+    ) async {
       bool understoodCalled = false;
 
       await tester.pumpWidget(

@@ -440,7 +440,7 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         icon: Icons.task_alt_outlined,
                         route: '/gestion/agreements',
                       ),
-                      const _DrawerSubItem(
+                      _DrawerSubItem(
                         label: 'Dashboard y Reportes',
                         icon: Icons.bar_chart_outlined,
                         route: AppRoute.reports.path,

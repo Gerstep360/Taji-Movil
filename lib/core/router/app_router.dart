@@ -114,9 +114,8 @@ class AppRouter {
           key: ValueKey(
             'community-areas-${context.watch<AuthController>().user?.id}-${context.watch<AuthController>().user?.activeTenant?.id}',
           ),
-          create: (_) => CommunityAreasController(
-            context.read<CommunityDataSource>(),
-          ),
+          create: (_) =>
+              CommunityAreasController(context.read<CommunityDataSource>()),
           child: const CommunityAreasScreen(),
         ),
       ),
@@ -209,7 +208,12 @@ class AppRouter {
       GoRoute(
         path: AppRoute.home.path,
         name: AppRoute.home.name,
-        builder: (_, __) => const HomeScreen(),
+        builder: (context, _) {
+          final user = context.watch<AuthController>().user;
+          return HomeScreen(
+            key: ValueKey('home-${user?.id}-${user?.activeTenant?.id}'),
+          );
+        },
       ),
       GoRoute(
         path: AppRoute.accessEvents.path,
