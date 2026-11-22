@@ -431,8 +431,8 @@ class _TajiDrawerState extends State<TajiDrawer> {
                       _DrawerSubItem(
                         label: 'Asambleas',
                         icon: Icons.account_balance_outlined,
-                        route: '/gestion/assemblies',
-                        isActive: currentLocation == '/gestion/assemblies',
+                        route: AppRoute.assemblies.path,
+                        isActive: currentLocation == AppRoute.assemblies.path,
                         isAvailable: true,
                       ),
                       const _DrawerSubItem(

@@ -8,6 +8,7 @@ import '../../features/maintenance/screens/maintenance_orders_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../features/assemblies/screens/assemblies_screen.dart';
 import '../../features/auth/screens/forgot_password_screen.dart';
 import '../../features/community/data/community_repository.dart';
 import '../../features/community/state/community_areas_controller.dart';
@@ -140,6 +141,11 @@ class AppRouter {
         path: AppRoute.visitConsultation.path,
         name: AppRoute.visitConsultation.name,
         builder: (_, __) => const VisitConsultationScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.assemblies.path,
+        name: AppRoute.assemblies.name,
+        builder: (_, __) => const AssembliesScreen(),
       ),
       GoRoute(
         path: AppRoute.splash.path,
@@ -350,6 +356,7 @@ class AppRouter {
     AppRoute.visitConsultation,
     AppRoute.reservations,
     AppRoute.announcements,
+    AppRoute.assemblies,
   ];
 
   static bool _isAuthenticatedRoute(String location) =>

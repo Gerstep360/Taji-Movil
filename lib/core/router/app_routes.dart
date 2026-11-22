@@ -27,7 +27,8 @@ enum AppRoute {
   communityAreas('/areas-comunes'),
   reservations('/reservas'),
   // CU28 / T123: centro de comunicados y notificaciones.
-  announcements('/comunicados');
+  announcements('/comunicados'),
+  assemblies('/asambleas');
 
   const AppRoute(this.path);
   final String path;
