@@ -152,4 +152,19 @@ extension TajiUserAccess on TajiUser {
       ].contains(role?.slug.toLowerCase()) ||
       hasPermission('operate_security_shifts') ||
       hasPermission('view_security_shifts');
+
+  bool get canManageMaintenance => isAdmin || hasPermission('manage_maintenance');
+
+  bool get canUpdateMaintenanceOrders =>
+      canManageMaintenance || hasPermission('update_work_order_status');
+
+  bool get canAttachWorkEvidence =>
+      canManageMaintenance || hasPermission('attach_work_evidence');
+
+  bool get canAccessMaintenance =>
+      canManageMaintenance ||
+      hasPermission('view_assigned_work_orders') ||
+      hasPermission('update_work_order_status') ||
+      hasPermission('attach_work_evidence') ||
+      hasPermission('access_assigned_external_orders');
 }

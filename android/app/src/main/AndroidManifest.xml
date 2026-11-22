@@ -1,8 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- CU10 / RF-10 (T106): el lector de QR de portería necesita la cámara.
-         Se declara como no obligatoria para que la app siga instalándose en
-         dispositivos sin cámara; el flujo del residente (CU09) no la usa. -->
+    <!-- CU10 escanea QR y CU25 captura evidencias; la cámara no es obligatoria. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
@@ -52,4 +50,3 @@
         </intent>
     </queries>
 </manifest>
-

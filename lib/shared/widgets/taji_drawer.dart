@@ -6,6 +6,7 @@ import '../../core/router/app_routes.dart';
 import '../../core/theme/taji_theme.dart';
 import '../../features/auth/models/taji_user.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/reservations/reservation_access.dart';
 import 'taji_logo.dart';
 
 class TajiDrawer extends StatefulWidget {
@@ -277,23 +278,16 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.inventory_2_outlined,
                     isExpanded: _isExpanded('paquete4'),
                     onToggle: () => _togglePackage('paquete4'),
-                    activeCount: 0,
-                    items: const [
-                      _DrawerSubItem(
-                        label: 'Inventario de Activos',
-                        icon: Icons.inventory_2_outlined,
-                        isAvailable: false,
-                      ),
-                      _DrawerSubItem(
-                        label: 'Identificación QR',
-                        icon: Icons.qr_code_outlined,
-                        isAvailable: false,
-                      ),
-                      _DrawerSubItem(
-                        label: 'Órdenes de Trabajo',
-                        icon: Icons.build_outlined,
-                        isAvailable: false,
-                      ),
+                    activeCount: user?.canAccessMaintenance == true ? 1 : 0,
+                    items: [
+                      if (user?.canAccessMaintenance == true)
+                        _DrawerSubItem(
+                          label: 'Órdenes de Trabajo (CU25)',
+                          icon: Icons.build_outlined,
+                          route: AppRoute.maintenanceOrders.path,
+                          isActive: currentLocation == AppRoute.maintenanceOrders.path,
+                          isAvailable: true,
+                        ),
                     ],
                   ),
 
@@ -306,24 +300,26 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.layers_outlined,
                     isExpanded: _isExpanded('paquete5'),
                     onToggle: () => _togglePackage('paquete5'),
-                    activeCount: 0,
-                    items: const [
+                    activeCount: user?.canUseReservations == true ? 1 : 0,
+                    items: [
                       _DrawerSubItem(
                         label: 'Áreas Comunes y Reservas',
                         icon: Icons.calendar_month_outlined,
-                        isAvailable: false,
+                        route: AppRoute.reservations.path,
+                        isActive: currentLocation == AppRoute.reservations.path,
+                        isAvailable: user?.canUseReservations == true,
                       ),
-                      _DrawerSubItem(
+                      const _DrawerSubItem(
                         label: 'Comunicados y Avisos',
                         icon: Icons.campaign_outlined,
                         isAvailable: false,
                       ),
-                      _DrawerSubItem(
+                      const _DrawerSubItem(
                         label: 'Asambleas y Acuerdos',
                         icon: Icons.account_balance_outlined,
                         isAvailable: false,
                       ),
-                      _DrawerSubItem(
+                      const _DrawerSubItem(
                         label: 'Dashboard y Reportes',
                         icon: Icons.bar_chart_outlined,
                         isAvailable: false,
