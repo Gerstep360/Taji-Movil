@@ -307,7 +307,7 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     isExpanded: _isExpanded('paquete5'),
                     onToggle: () => _togglePackage('paquete5'),
                     activeCount: 0,
-                    items: const [
+                    items: [
                       _DrawerSubItem(
                         label: 'Áreas Comunes y Reservas',
                         icon: Icons.calendar_month_outlined,
@@ -321,7 +321,9 @@ class _TajiDrawerState extends State<TajiDrawer> {
                       _DrawerSubItem(
                         label: 'Asambleas y Acuerdos',
                         icon: Icons.account_balance_outlined,
-                        isAvailable: false,
+                        route: AppRoute.assemblies.path,
+                        isActive: currentLocation == AppRoute.assemblies.path,
+                        isAvailable: true,
                       ),
                       _DrawerSubItem(
                         label: 'Dashboard y Reportes',

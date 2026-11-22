@@ -3,6 +3,8 @@ class ApiEndpoints {
 
   static const health = '/health/';
   static const visitConsultation = '/security/cu12/visits/';
+  static const assemblies = '/assemblies/';
+  static String assemblyAgreements(int id) => '/assemblies/$id/agreements/';
   static const shiftLogs = '/security/novedades-turno/';
   static const handovers = '/security/entregas-turno/';
   static const accessEvents = _AccessEventEndpoints();
