@@ -24,7 +24,8 @@ enum AppRoute {
   qrScanHistory('/bitacora-escaneos'),
   visitConsultation('/visitas-dentro'),
   // CU26 / T121: consulta de áreas comunes y disponibilidad.
-  communityAreas('/areas-comunes');
+  communityAreas('/areas-comunes'),
+  reservations('/reservas');
 
   const AppRoute(this.path);
   final String path;

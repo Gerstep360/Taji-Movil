@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../core/router/app_routes.dart';
 import '../../features/auth/models/taji_user.dart';
 import '../../features/auth/state/auth_controller.dart';
+import '../../features/reservations/reservation_access.dart';
 import 'taji_logo.dart';
 
 class TajiDrawer extends StatefulWidget {
@@ -397,14 +398,15 @@ class _TajiDrawerState extends State<TajiDrawer> {
                     icon: Icons.layers_outlined,
                     isExpanded: _isExpanded('paquete5'),
                     onToggle: () => _togglePackage('paquete5'),
-                    activeCount: 6 + (user?.canUseReports == true ? 1 : 0),
+                    activeCount: 5 + (user?.canUseReservations == true ? 1 : 0) +
+                        (user?.canUseReports == true ? 1 : 0),
                     items: [
                       _DrawerSubItem(
                         label: 'Reservas de áreas',
                         icon: Icons.calendar_month_outlined,
-                        route: '/gestion/reservations',
-                        isActive: currentLocation == '/gestion/reservations',
-                        isAvailable: true,
+                        route: AppRoute.reservations.path,
+                        isActive: currentLocation == AppRoute.reservations.path,
+                        isAvailable: user?.canUseReservations == true,
                       ),
                       _DrawerSubItem(
                         label: 'Áreas y disponibilidad',
@@ -419,7 +421,7 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         icon: Icons.park_outlined,
                         route: '/gestion/areas',
                       ),
-                      _DrawerSubItem(
+                      const _DrawerSubItem(
                         label: 'Comunicados y Avisos',
                         icon: Icons.campaign_outlined,
                         route: '/gestion/announcements',
@@ -438,7 +440,7 @@ class _TajiDrawerState extends State<TajiDrawer> {
                         icon: Icons.task_alt_outlined,
                         route: '/gestion/agreements',
                       ),
-                      _DrawerSubItem(
+                      const _DrawerSubItem(
                         label: 'Dashboard y Reportes',
                         icon: Icons.bar_chart_outlined,
                         route: AppRoute.reports.path,
