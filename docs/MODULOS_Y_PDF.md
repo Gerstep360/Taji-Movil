@@ -1,6 +1,12 @@
 # Módulos móviles disponibles
 
-Versión `1.1.0+2`. Instalar una compilación nueva: el APK anterior no recibe pantallas nuevas por actualizar el servidor.
+Versión `1.1.2+4`. Instalar una compilación nueva: el APK anterior no recibe pantallas nuevas por actualizar el servidor.
+
+## Dictado de reportes sin Google
+
+La pantalla de reportes usa `RecordedReportVoice` y `record` 6.2.1: captura PCM16 mono a 16 kHz en memoria, hasta 30 segundos (<1 MB), sin ventanas de Google ni modelos de reconocimiento en el teléfono. Termina tras una pausa de voz o con «Terminar y consultar». El audio WAV se envía autenticado a `cu31/transcribe/`; el Backend usa NVIDIA y no persiste el audio. Requiere conexión y consume la API de NVIDIA. La clave permanece en el servidor.
+
+La consulta se envía automáticamente solo cuando llega una transcripción; cancelar o fallar no genera una consulta. Hay un timeout de transcripción de 45 segundos independiente del cliente general. No se garantiza reconocimiento perfecto: ruido, conexión y disponibilidad del proveedor siguen afectando el resultado. La escritura manual continúa disponible. El grabador requiere recompilar e instalar el APK, no basta hot reload.
 
 - Inicio: accesos directos a incidencias/IA, reservas, comunicados y reportes PDF según permisos.
 - Gestión: condominio, personal, sectores, unidades, residentes, asociaciones, permisos de roles existentes y bitácora.

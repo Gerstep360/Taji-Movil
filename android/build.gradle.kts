@@ -5,7 +5,10 @@ allprojects {
     }
 }
 
-val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
+// Permite una compilación aislada si Windows mantiene bloqueados artefactos antiguos.
+val newBuildDir: Directory = providers.gradleProperty("tajiBuildDir").orNull
+    ?.let { rootProject.layout.projectDirectory.dir(it) }
+    ?: rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {

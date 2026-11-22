@@ -12,6 +12,7 @@ import '../../../shared/widgets/taji_drawer.dart';
 import 'report_models.dart';
 import 'report_repository.dart';
 import 'report_voice.dart';
+import 'recorded_report_voice.dart';
 import 'report_widgets.dart';
 
 class ReportsScreen extends StatelessWidget {
@@ -43,7 +44,19 @@ class ReportsWorkspace extends StatefulWidget {
 }
 
 class _ReportsWorkspaceState extends State<ReportsWorkspace> {
-  late final ReportVoice voice = widget.voice ?? NativeReportVoice();
+  late final ReportVoice voice =
+      widget.voice ??
+      RecordedReportVoice(
+        transcribe: widget.repository.transcribe,
+        onProcessing: (value) {
+          if (mounted) {
+            setState(() {
+              transcribing = value;
+              if (value) listening = false;
+            });
+          }
+        },
+      );
   final text = TextEditingController(), title = TextEditingController();
   ReportCatalog? catalog;
   ReportSource? source;
@@ -54,7 +67,9 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
   String orderField = '', direction = 'asc', format = 'xlsx', summary = '';
   String? error, notice;
   bool loading = true, busy = false, listening = false;
+  bool transcribing = false;
   int pageSize = 25;
+  int dictationGeneration = 0;
   @override
   void initState() {
     super.initState();
@@ -79,7 +94,9 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
       final c = await widget.repository.catalog();
       if (!mounted) return;
       if (c.formats.isEmpty || c.sources.isEmpty) {
-        throw StateError('El servidor todavía no tiene fuentes de reportes disponibles para este condominio.');
+        throw StateError(
+          'El servidor todavía no tiene fuentes de reportes disponibles para este condominio.',
+        );
       }
       setState(() {
         catalog = c;
@@ -167,6 +184,7 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
 
   Future<void> ask() async {
     if (text.text.trim().isEmpty || busy) return;
+    dictationGeneration++;
     await voice.stop();
     if (!mounted) return;
     setState(() => listening = false);
@@ -202,10 +220,21 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
 
   Future<void> dictate() async {
     if (listening) {
+      if (voice is RecordedReportVoice) {
+        setState(() {
+          listening = false;
+          transcribing = true;
+        });
+        await (voice as RecordedReportVoice).finishRecording();
+        return;
+      }
+      dictationGeneration++;
       await voice.stop();
       if (mounted) setState(() => listening = false);
       return;
     }
+    final generation = ++dictationGeneration;
+    var recognized = '', failed = false, submitted = false;
     setState(() {
       listening = true;
       error = null;
@@ -213,7 +242,8 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
     try {
       await voice.listen(
         (value) {
-          if (mounted) {
+          if (mounted && generation == dictationGeneration) {
+            recognized = value.trim();
             text.value = TextEditingValue(
               text: value,
               selection: TextSelection.collapsed(offset: value.length),
@@ -221,10 +251,16 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
           }
         },
         () {
-          if (mounted) setState(() => listening = false);
+          if (!mounted || generation != dictationGeneration) return;
+          setState(() => listening = false);
+          if (!failed && !submitted && recognized.isNotEmpty) {
+            submitted = true;
+            unawaited(ask());
+          }
         },
         (value) {
-          if (mounted) {
+          failed = true;
+          if (mounted && generation == dictationGeneration) {
             setState(() {
               listening = false;
               error = value;
@@ -375,7 +411,8 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
               if (c.voice)
                 ReportSection(
                   title: 'Pregunta con tus palabras',
-                  subtitle: 'Escribe o dicta. Tú decides cuándo enviar.',
+                  subtitle:
+                      'Dicta y consultamos al terminar. También puedes escribir.',
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -397,23 +434,44 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
                         runSpacing: 8,
                         children: [
                           OutlinedButton.icon(
-                            onPressed: busy ? null : dictate,
+                            onPressed: busy || transcribing ? null : dictate,
                             icon: Icon(listening ? Icons.stop : Icons.mic_none),
                             label: Text(
-                              listening ? 'Detener dictado' : 'Dictar',
+                              transcribing
+                                  ? 'Transcribiendo…'
+                                  : listening
+                                  ? 'Terminar y consultar'
+                                  : 'Dictar',
                             ),
                           ),
                           FilledButton(
-                            onPressed: busy ? null : ask,
+                            onPressed: busy || transcribing || listening
+                                ? null
+                                : ask,
                             child: const Text('Consultar'),
                           ),
+                          if ((listening || transcribing) &&
+                              voice is RecordedReportVoice)
+                            TextButton(
+                              onPressed: () async {
+                                dictationGeneration++;
+                                await voice.stop();
+                                if (mounted) {
+                                  setState(() {
+                                    listening = false;
+                                    transcribing = false;
+                                  });
+                                }
+                              },
+                              child: const Text('Cancelar'),
+                            ),
                         ],
                       ),
                       if (listening)
                         const Padding(
                           padding: EdgeInsets.only(top: 8),
                           child: Text(
-                            'Escuchando… Revisa el texto antes de consultar.',
+                            'Escuchando… Consultaremos al terminar el dictado.',
                           ),
                         ),
                       gap(),
@@ -436,7 +494,7 @@ class _ReportsWorkspaceState extends State<ReportsWorkspace> {
                       ),
                       gap(),
                       const Text(
-                        'El dictado usa el servicio de voz del dispositivo, que puede procesar audio externamente. Taji recibe el texto. Puedes escribir sin activar el micrófono.',
+                        'Al dictar, Taji envía hasta 30 segundos de audio al servidor y a NVIDIA para transcribir. Requiere Internet. No se guarda el audio. También puedes escribir sin usar el micrófono.',
                         style: TextStyle(fontSize: 11, color: TajiColors.muted),
                       ),
                     ],

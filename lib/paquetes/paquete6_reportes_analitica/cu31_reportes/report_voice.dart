@@ -15,6 +15,7 @@ abstract class ReportVoice {
 }
 
 class NativeReportVoice implements ReportVoice {
+  NativeReportVoice({SpeechToText? speech}) : _speech = speech;
   SpeechToText? _speech;
   FlutterTts? _tts;
   int _listenGeneration = 0;
@@ -28,43 +29,55 @@ class NativeReportVoice implements ReportVoice {
   ) async {
     final generation = ++_listenGeneration;
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      var useService = false;
       try {
         final text = await _googleVoice.invokeMethod<String>('listenGoogle');
         if (generation != _listenGeneration) return;
         if (text != null && text.trim().isNotEmpty) {
           onText(text.length > 500 ? text.substring(0, 500) : text);
         } else {
-          onError('No se reconocieron palabras. Vuelve a dictar.');
+          useService = true;
         }
       } on PlatformException catch (error) {
-        if (generation == _listenGeneration) {
+        useService = [
+          'google_unavailable',
+          'google_failed',
+          'recognizer_empty_result',
+        ].contains(error.code);
+        if (!useService &&
+            error.code != 'cancelled' &&
+            generation == _listenGeneration) {
           onError(error.message ?? 'No se pudo abrir el dictado de Google.');
         }
       } on MissingPluginException {
-        if (generation == _listenGeneration) {
-          onError(
-            'Esta instalación todavía no incluye el dictado de Google. Reinstala la app con la nueva versión; hot reload no actualiza código Android.',
-          );
-        }
+        useService = true;
       } finally {
-        if (generation == _listenGeneration) onEnd();
+        if (!useService && generation == _listenGeneration) onEnd();
       }
-      return;
+      if (!useService || generation != _listenGeneration) return;
     }
     final speech = _speech ??= SpeechToText();
+    var ended = false;
+    void finish() {
+      if (ended || generation != _listenGeneration) return;
+      ended = true;
+      onEnd();
+    }
+
     // initialize conserva los primeros callbacks; actualizar los listeners en cada sesión.
     speech.statusListener = (status) {
-      if (generation == _listenGeneration &&
-          (status == 'done' || status == 'notListening')) {
+      if (generation == _listenGeneration && status == 'done') {
+        // Android puede avisar "done" antes del resultado final. No consumirlo:
+        // cerrar el indicador, pero permitir entregar y consultar el texto final.
         onEnd();
       }
     };
     speech.errorListener = (error) {
       if (generation != _listenGeneration) return;
-      onEnd();
       onError(
         'El servicio de voz no pudo transcribir (${error.errorMsg}). Revisa permisos, conexión e idioma español.',
       );
+      finish();
     };
     final available = await speech.initialize(
       onStatus: speech.statusListener,
@@ -89,12 +102,13 @@ class NativeReportVoice implements ReportVoice {
     await speech.listen(
       localeId: spanish.first.localeId,
       onResult: (result) {
-        if (generation != _listenGeneration) return;
+        if (generation != _listenGeneration || !result.finalResult) return;
         onText(
           result.recognizedWords.length > 500
               ? result.recognizedWords.substring(0, 500)
               : result.recognizedWords,
         );
+        finish();
       },
       listenOptions: SpeechListenOptions(
         partialResults: true,
@@ -121,7 +135,11 @@ class NativeReportVoice implements ReportVoice {
   Future<void> stop() async {
     _listenGeneration++;
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      await _googleVoice.invokeMethod<void>('cancelGoogle');
+      try {
+        await _googleVoice.invokeMethod<void>('cancelGoogle');
+      } on MissingPluginException {
+        // Puede haberse usado directamente RecognitionService.
+      }
     }
     await _speech?.cancel();
   }

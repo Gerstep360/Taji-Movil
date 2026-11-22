@@ -1,12 +1,40 @@
 import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_endpoints.dart';
+import '../../../core/network/api_failure.dart';
 import 'report_models.dart';
 
 class ReportsRepository {
   ReportsRepository(this.api);
   final ApiClient api;
   static const root = ApiEndpoints.reports;
+  Future<String> transcribe(Uint8List wav) async {
+    try {
+      final response = await api.dio.post<Map<String, dynamic>>(
+        '${root}transcribe/',
+        data: FormData.fromMap({
+          'audio_file': MultipartFile.fromBytes(wav, filename: 'consulta.wav'),
+        }),
+        options: Options(receiveTimeout: const Duration(seconds: 45)),
+      );
+      final text = response.data?['text'];
+      if (text is! String || text.trim().isEmpty || text.length > 500) {
+        throw StateError(
+          'No llegó una transcripción válida. Puedes reintentar o escribir.',
+        );
+      }
+      return text.trim();
+    } on DioException catch (error) {
+      throw StateError(
+        ApiFailure.fromDio(
+          error,
+          fallback: 'No se pudo transcribir. Reintenta o escribe la consulta.',
+        ).displayMessage,
+      );
+    }
+  }
+
   Future<ReportCatalog> catalog() async {
     final data = await api.get<Map<String, dynamic>>('${root}catalog/');
     if (data == null) {

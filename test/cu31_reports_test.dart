@@ -113,6 +113,7 @@ class FakeVoice implements ReportVoice {
   ) async {
     onText('Incidencias pendientes');
     onEnd();
+    onEnd(); // Android puede repetir el aviso de fin; solo se consulta una vez.
   }
 
   @override
@@ -226,11 +227,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         repo.voiceCalls,
-        0,
-        reason: 'Dictar no debe enviar la consulta automáticamente',
+        1,
+        reason: 'El dictado terminado debe consultar automáticamente una vez',
       );
-      await tester.tap(find.text('Consultar'));
-      await tester.pumpAndSettle();
       expect(repo.voiceCalls, 1);
       if (fontPath != null) {
         await savePreview(
